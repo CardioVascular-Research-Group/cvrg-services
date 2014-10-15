@@ -1,0 +1,24 @@
+<serviceGroup>
+	<service name="physionetAnalysisService" scope="application">
+		<messageReceivers>
+			<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-out" class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver" />
+		</messageReceivers>
+		<parameter name="ServiceClass" locked="false">
+			edu.jhu.cvrg.service.analysis.Physionet
+		</parameter>
+		<operation name="getVersion">
+			<messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+		</operation>
+	</service>
+	<service name="qrs_scoreAnalysisService" scope="application">
+		<messageReceivers>
+			<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-out" class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver" />
+		</messageReceivers>
+		<parameter name="ServiceClass" locked="false">
+			edu.jhu.cvrg.service.analysis.QRS_ScoreService
+		</parameter>
+		<operation name="getVersion">
+			<messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+		</operation>
+	</service>
+</serviceGroup>
