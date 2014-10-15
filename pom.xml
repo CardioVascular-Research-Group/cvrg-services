@@ -2,10 +2,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.jhu.cvrg</groupId>
-  <artifactId>cvrg-broker-service2</artifactId>
+  <artifactId>cvrg-services</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
-  <name>cvrg-broker-service2</name>
+  <name>cvrg-services</name>
   <url>http://maven.apache.org</url>
   <dependencies>
     <dependency>

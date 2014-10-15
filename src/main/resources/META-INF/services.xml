@@ -21,4 +21,25 @@
 			<messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
 		</operation>
 	</service>
+	<service name="waveformDataService" scope="application">
+		<messageReceivers>
+			<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-out"
+				class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver" />
+		</messageReceivers>
+		<parameter name="ServiceClass" locked="false">
+			edu.jhu.cvrg.service.visualize.WFDBdata
+		</parameter>
+		<operation name="getVersion">
+			<messageReceiver class="org.apache.axis2.rpc.receivers.RPCMessageReceiver"/>
+		</operation>
+	</service>
+	<service name="dataTransferService" scope="application">
+		<messageReceivers>
+			<messageReceiver mep="http://www.w3.org/2004/08/wsdl/in-out" class="org.apache.axis2.receivers.RawXMLINOutMessageReceiver" />
+		</messageReceivers>
+		<parameter name="ServiceClass" locked="false">
+			edu.jhu.cvrg.service.dataTransfer.DataTransfer
+		</parameter>
+		<parameter name="enableMTOM">true</parameter>
+	</service>
 </serviceGroup>
