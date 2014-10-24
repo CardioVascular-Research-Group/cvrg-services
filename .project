@@ -2,12 +2,7 @@
 <projectDescription>
   <name>cvrg-services</name>
   <comment>NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
-  <projects>
-    <project>cvrg-analysisHub</project>
-    <project>liferay-ws-client</project>
-    <project>waveform-utilities</project>
-    <project>cvrg-dataStorage</project>
-  </projects>
+  <projects/>
   <buildSpec>
     <buildCommand>
       <name>org.eclipse.jdt.core.javabuilder</name>
