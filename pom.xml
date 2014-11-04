@@ -7,6 +7,14 @@
   <version>1.0-SNAPSHOT</version>
   <name>cvrg-services</name>
   <url>http://maven.apache.org</url>
+
+  <parent>
+    <groupId>edu.jhu.cvrg</groupId>
+    <artifactId>cvrg-waveform</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <relativePath>../maven-parents/waveform/pom.xml</relativePath>
+  </parent>
+
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
@@ -41,7 +49,7 @@
 	</dependency>
 	<dependency>
 		<groupId>edu.jhu.icm</groupId>
-		<artifactId>ecgFormatConverter</artifactId>
+		<artifactId>ECG_Converter4</artifactId>
 		<version>1.0-SNAPSHOT</version>
 	</dependency>
 	<dependency>
@@ -69,18 +77,6 @@
 							<servicesXmlFile>src/main/resources/META-INF/services.xml</servicesXmlFile>
 						</configuration>
 					</execution>
-					<execution>
-						<id>deployaar</id>
-						<goals>
-							<goal>deployaar</goal>
-						</goals>
-						<phase>install</phase>
-						<configuration>
-							<axis2AdminUser>admin</axis2AdminUser>
-							<axis2AdminPassword>axis2</axis2AdminPassword>
-							<aarDirectory>${project.build.directory}</aarDirectory>
-						</configuration>
-					</execution>
 				</executions>
 			</plugin>
 			<plugin>
@@ -90,6 +86,32 @@
 					<source>1.5</source>
 					<target>1.5</target>
 				</configuration>
+			</plugin>
+			<plugin>
+		    	<groupId>org.apache.maven.plugins</groupId>
+		    	<artifactId>maven-antrun-plugin</artifactId>
+		    	<version>1.7</version>
+	        	<executions>
+	          		<execution>
+	            		<id>install</id>
+	            		<phase>install</phase>
+	            		<configuration>
+		              		<target>
+		                		<property name="compile_classpath" refid="maven.compile.classpath"/>
+		                		<property name="runtime_classpath" refid="maven.runtime.classpath"/>
+		                		<property name="test_classpath" refid="maven.test.classpath"/>
+		                		<property name="plugin_classpath" refid="maven.plugin.classpath"/>
+								<property name="project.version" value="${project.version}"/>
+				                <ant antfile="${basedir}/build.xml">
+				                  <target name="local-server-deploy"/>
+				                </ant>
+		              		</target>
+	            		</configuration>
+		            	<goals>
+		             		<goal>run</goal>
+		            	</goals>
+		        	</execution>
+		    	</executions>
 			</plugin>
 		</plugins>
 	</build>

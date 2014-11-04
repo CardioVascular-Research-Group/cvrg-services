@@ -1,0 +1,19 @@
+<project name="cvrg-services" basedir="." default="local-server-deploy">
+	
+	<property name="liferay" value="/opt/liferay" />
+	<property name="liferay-sdk" value="${liferay}/liferay-plugins-sdk-6.1.1" />
+	<property file="${liferay-sdk}/build.${user.name}.properties" />
+	<property name="axis2deployFolder" value="${app.server.dir}/webapps/axis2/WEB-INF/services"/>
+	
+	<target name="local-server-deploy" description="Move the generated jar to the local server.">
+    	
+		<delete>
+			<fileset dir="${axis2deployFolder}">
+			    <include name="${ant.project.name}*.aar"/>
+			</fileset>
+		</delete>
+
+		<copy todir="${axis2deployFolder}" file="target/${ant.project.name}.aar" />
+	</target>
+
+</project>
