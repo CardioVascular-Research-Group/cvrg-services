@@ -3,6 +3,7 @@ package edu.jhu.cvrg.service.conversion;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -21,12 +22,15 @@ import edu.jhu.cvrg.data.factory.ConnectionFactory;
 import edu.jhu.cvrg.data.util.DataStorageException;
 import edu.jhu.cvrg.service.conversion.vo.MetaContainer;
 import edu.jhu.cvrg.service.utilities.ServiceUtils;
+import edu.jhu.cvrg.waveform.utility.WebServiceUtility;
 import edu.jhu.icm.ecgFormatConverter.ECGformatConverter;
 import edu.jhu.icm.ecgFormatConverter.ECGformatConverter.fileFormat;
 
 public class FileProccessThread extends Thread {
 
 	private String sep = File.separator;
+	
+	private static Map<String, Map<String, String>> ontologyCache = new HashMap<String, Map<String,String>>();
 	
 	private MetaContainer metaData;
 	private ECGformatConverter.fileFormat inputFormat;
@@ -243,10 +247,44 @@ public class FileProccessThread extends Thread {
 		if(annotationArray != null && annotationArray.size() > 0){
 			for(String name : annotationArray.keySet()) {
 				
-				ann = new AnnotationDTO(Long.valueOf(userId), docId, processor.getName(), type, name, 
-										null /*annData.getConceptID() != null ? AnnotationDTO.ECG_TERMS_ONTOLOGY : null*/, 
-										null /*annData.getConceptID()*/, null /*annData.getConceptRestURL()*/,
-									    leadIndex, null/*unit*/, null /*annData.getComment()*/, annotationArray.get(name), new GregorianCalendar(), 
+				
+				String termName = name;
+				String fullAnnotation = null;
+				String bioportalOntology = null;
+				String bioportalClassId = null;
+				
+				String bioportalReference = BioportalReferenceMap.lookup(name);
+				
+				if(bioportalReference != null){
+					
+					if(bioportalReference.startsWith("ECGTermsv1")){
+						bioportalOntology = AnnotationDTO.ECG_TERMS_ONTOLOGY;
+					}else if(bioportalReference.startsWith("ECGOntology")){
+						bioportalOntology = AnnotationDTO.ELECTROCARDIOGRAPHY_ONTOLOGY;
+					}
+					
+					if(bioportalOntology != null){
+						Map<String, String> saOntDetails = ontologyCache.get(bioportalReference);
+						if(saOntDetails == null){
+							saOntDetails = WebServiceUtility.lookupOntology(bioportalOntology, bioportalReference, "definition", "prefLabel", "@id");
+							ontologyCache.put(bioportalReference, saOntDetails);
+						}
+						 
+						termName = "Not found";
+						fullAnnotation = "Not found";
+						
+						if(saOntDetails != null){
+							termName = saOntDetails.get("prefLabel");
+							fullAnnotation = saOntDetails.get("definition");
+							bioportalClassId = saOntDetails.get("@id");
+						}
+					}
+				}
+				
+				ann = new AnnotationDTO(Long.valueOf(userId), docId, processor.getName(), type, termName, 
+										bioportalOntology, 
+										bioportalClassId, null /*will be generate at constructor*/,
+									    leadIndex, null/*unit*/, fullAnnotation, annotationArray.get(name), new GregorianCalendar(), 
 									    null, null, 
 									    null, null);
 				 

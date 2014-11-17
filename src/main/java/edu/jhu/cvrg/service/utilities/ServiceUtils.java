@@ -25,6 +25,7 @@ import edu.jhu.cvrg.liferay.portal.service.ServiceContext;
 import edu.jhu.cvrg.liferay.portlet.documentlibrary.service.http.DLAppServiceSoap;
 import edu.jhu.cvrg.liferay.portlet.documentlibrary.service.http.DLAppServiceSoapServiceLocator;
 import edu.jhu.cvrg.liferay.portlet.documentlibrary.service.http.Portlet_DL_DLAppServiceSoapBindingStub;
+import edu.jhu.cvrg.waveform.utility.ServiceProperties;
 
 public class ServiceUtils {
 

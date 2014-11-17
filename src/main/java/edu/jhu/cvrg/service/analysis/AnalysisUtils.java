@@ -17,8 +17,8 @@ import org.apache.log4j.Logger;
 import edu.jhu.cvrg.analysis.vo.AnalysisResultType;
 import edu.jhu.cvrg.analysis.vo.AnalysisType;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
-import edu.jhu.cvrg.service.utilities.ServiceProperties;
 import edu.jhu.cvrg.service.utilities.ServiceUtils;
+import edu.jhu.cvrg.waveform.utility.ServiceProperties;
 import edu.jhu.cvrg.waveform.utility.WebServiceUtility;
 
 
@@ -74,6 +74,8 @@ public class AnalysisUtils {
 			}
 			
 			ret = new AnalysisVO(jobID, algorithm, resultType, inputFileNames, mapCommandParam);
+			
+			ret.setTempFolder(ServiceUtils.SERVER_TEMP_ANALYSIS_FOLDER);
 			
 		} catch (Exception e) {
 			errorMessage = "parseInputParametersType2 failed.";
@@ -185,7 +187,7 @@ public class AnalysisUtils {
 		
 		ServiceProperties props = ServiceProperties.getInstance();
 		
-		return WebServiceUtility.callWebService(parameterMap, props.getProperty(ServiceProperties.DATATRANSFER_SERVICE_METHOD), props.getProperty(ServiceProperties.DATATRANSFER_SERVICE_NAME), props.getProperty(ServiceProperties.DATATRANSFER_SERVICE_URL), null);
+		return WebServiceUtility.callWebService(parameterMap, props.getProperty(ServiceProperties.DATATRANSFER_SERVICE_METHOD), props.getProperty(ServiceProperties.DATATRANSFER_SERVICE_NAME), props.getProperty(ServiceProperties.MAIN_SERVICE_URL), null);
 		
 		
 		
