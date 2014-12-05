@@ -44,6 +44,7 @@ public class FileProccessThread extends Thread {
 	private Connection dbUtility;
 	private long docId;
 	private long userId;
+	private long[] filesId = null;
 	
 	long writeTime = 0L;
 	
@@ -84,124 +85,145 @@ public class FileProccessThread extends Thread {
 	
 	private void fileProccess() throws Exception{
 
+		boolean noConversionErrors = false;
+		String message = null;
+		
 		long writeTime = java.lang.System.currentTimeMillis();
-		
-		int rowsWritten;
-		
-		rowsWritten = conv.write(outputFormat, outputPath, recordName);
-		
-		log.info("rowsWritten: " + rowsWritten);
-		
-		log.info(" +++++ Conversion completed successfully, results will be transfered.");
-		
-		tranferFileToLiferay(outputFormat, inputFormat, metaData.getFileName(), inputPath, groupId, folderId, docId, userId);
-		
-		writeTime = java.lang.System.currentTimeMillis() - writeTime;
-		
-		log.info("["+docId+"]The runtime for writing the new file is = " + writeTime + " milliseconds");
-		
 		Boolean done = !(fileFormat.PHILIPS103.equals(inputFormat) || fileFormat.PHILIPS104.equals(inputFormat)  || fileFormat.SCHILLER.equals(inputFormat) || fileFormat.MUSEXML.equals(inputFormat));
 		
-		dbUtility.updateUploadStatus(docId, UploadState.WRITE, writeTime, done ? Boolean.TRUE : null, null);
-
-		long  annotationTime = java.lang.System.currentTimeMillis();
+		try{
+			int rowsWritten = conv.write(outputFormat, outputPath, recordName);
+			
+			if(rowsWritten == 0){
+				throw new Exception("Unable to write the WFDB file");
+			}
+			
+			log.info("rowsWritten: " + rowsWritten);
+			log.info(" +++++ Conversion completed successfully, results will be transfered.");
+			
+			tranferFileToLiferay(outputFormat, inputFormat, metaData.getFileName(), inputPath, groupId, folderId, docId, userId);
+			
+			noConversionErrors = true;
+		}catch (Exception e){
+			
+			this.cleanupError();
+			message = e.getMessage();
+			
+		}finally{
+			writeTime = java.lang.System.currentTimeMillis() - writeTime;
+			log.info("["+docId+"]The runtime for writing the new file is = " + writeTime + " milliseconds");
+			dbUtility.updateUploadStatus(docId, UploadState.WRITE, writeTime, (!noConversionErrors && done) ? Boolean.TRUE : null, message);
+		}
 		
-		Map<String, String> nonLeadList = null;
-		Map<Integer, Map<String, String>> leadList = null;
-		AnnotationsProcessor processor = null;
 		
-		if(fileFormat.PHILIPS103.equals(inputFormat)) {
-			
-			org.sierraecg.schema.Restingecgdata ecgData = (org.sierraecg.schema.Restingecgdata) conv.getPhilipsRestingecgdata();
-			processor = new Philips103AnnotationsProcessor(ecgData);
-		
-		}else if(fileFormat.PHILIPS104.equals(inputFormat)) {
-			
-			org.cvrgrid.philips.jaxb.beans.Restingecgdata ecgData = (org.cvrgrid.philips.jaxb.beans.Restingecgdata) conv.getPhilipsRestingecgdata();
-			processor = new Philips104AnnotationsProcessor(ecgData);
-			
-		}else if(fileFormat.SCHILLER.equals(inputFormat)) {
-			                                               
-			org.cvrgrid.schiller.jaxb.beans.ComXiriuzSemaXmlSchillerEDISchillerEDI ecgData = (org.cvrgrid.schiller.jaxb.beans.ComXiriuzSemaXmlSchillerEDISchillerEDI) conv.getComXiriuzSemaXmlSchillerEDISchillerEDI();
-			processor = new SchillerAnnotationsProcessor(ecgData);
-			
-		}else if(fileFormat.MUSEXML.equals(inputFormat)) {
-			String rawMuseXML = conv.getMuseRawXML();
-			if(rawMuseXML != null) {
-				processor = new MuseAnnotationsProcessor(rawMuseXML, docId, userId);
+		if(noConversionErrors){
+			long  annotationTime = java.lang.System.currentTimeMillis();
+			message = null;
+			try{
+				Map<String, String> nonLeadList = null;
+				Map<Integer, Map<String, String>> leadList = null;
+				AnnotationsProcessor processor = null;
+				
+				if(fileFormat.PHILIPS103.equals(inputFormat)) {
+					
+					org.sierraecg.schema.Restingecgdata ecgData = (org.sierraecg.schema.Restingecgdata) conv.getPhilipsRestingecgdata();
+					processor = new Philips103AnnotationsProcessor(ecgData);
+				
+				}else if(fileFormat.PHILIPS104.equals(inputFormat)) {
+					
+					org.cvrgrid.philips.jaxb.beans.Restingecgdata ecgData = (org.cvrgrid.philips.jaxb.beans.Restingecgdata) conv.getPhilipsRestingecgdata();
+					processor = new Philips104AnnotationsProcessor(ecgData);
+					
+				}else if(fileFormat.SCHILLER.equals(inputFormat)) {
+					                                               
+					org.cvrgrid.schiller.jaxb.beans.ComXiriuzSemaXmlSchillerEDISchillerEDI ecgData = (org.cvrgrid.schiller.jaxb.beans.ComXiriuzSemaXmlSchillerEDISchillerEDI) conv.getComXiriuzSemaXmlSchillerEDISchillerEDI();
+					processor = new SchillerAnnotationsProcessor(ecgData);
+					
+				}else if(fileFormat.MUSEXML.equals(inputFormat)) {
+					String rawMuseXML = conv.getMuseRawXML();
+					if(rawMuseXML != null) {
+						processor = new MuseAnnotationsProcessor(rawMuseXML, docId, userId);
+					}
+				}
+				
+				
+				if(processor != null){
+					processor.processAll();
+					
+					nonLeadList = processor.getGlobalAnnotations();
+					leadList = processor.getLeadAnnotations();
+					
+					Set<AnnotationDTO> annotationsDTO = new HashSet<AnnotationDTO>();
+					
+					annotationsDTO.addAll(convertLeadAnnotations(leadList, processor));
+					annotationsDTO.addAll(convertNonLeadAnnotations(nonLeadList, processor));
+				
+					commitAnnotations(annotationsDTO);
+				}
+			}catch (Exception e){
+				message = e.getMessage();
+			}finally{
+				annotationTime = java.lang.System.currentTimeMillis() - annotationTime;
+				log.info("["+docId+"]The runtime for analyse annotation and entering it into the database is = " + annotationTime + " milliseconds");
+				
+				dbUtility.updateUploadStatus(docId, UploadState.ANNOTATION, annotationTime, Boolean.TRUE, message);
+				
 			}
 		}
 		
-		
-		if(processor != null){
-			processor.processAll();
-			
-			nonLeadList = processor.getGlobalAnnotations();
-			leadList = processor.getLeadAnnotations();
-			
-			Set<AnnotationDTO> annotationsDTO = new HashSet<AnnotationDTO>();
-			
-			annotationsDTO.addAll(convertLeadAnnotations(leadList, processor));
-			annotationsDTO.addAll(convertNonLeadAnnotations(nonLeadList, processor));
-		
-			commitAnnotations(annotationsDTO);
-		}
-		
-		annotationTime = java.lang.System.currentTimeMillis() - annotationTime;
-		log.info("["+docId+"]The runtime for analyse annotation and entering it into the database is = " + annotationTime + " milliseconds");
-		dbUtility.updateUploadStatus(docId, UploadState.ANNOTATION, annotationTime, Boolean.TRUE, null);
 		
 		
 	}
 	
-	private String tranferFileToLiferay(fileFormat outputFormat, fileFormat inputFormat, String inputFilename, String inputPath, long groupId, long folderId, long docId, long userId){
-		String errorMessage="";
-		try {
-
-			String outputExt = ".dat";
-			if (outputFormat == ECGformatConverter.fileFormat.RDT){ 
-				outputExt = ".rdt"; }
-			else if (outputFormat == ECGformatConverter.fileFormat.GEMUSE) {
-				outputExt = ".txt";
-			}else if (outputFormat == ECGformatConverter.fileFormat.HL7) {
-				outputExt = ".xml";
-			}
-
-			String outputFileName = inputFilename.substring(0, inputFilename.lastIndexOf(".")) + outputExt;
-
-			File orign = new File(inputPath + outputFileName);
-			FileInputStream fis = new FileInputStream(orign);
-			
-			long[] filesId = null; 
-			
-			Long fileId = ServiceUtils.sendToLiferay(groupId, folderId, userId, inputPath, outputFileName, orign.length(), fis);
-			
-			String name = inputFilename.substring(0, inputFilename.lastIndexOf(".")); // file name minus extension.
-
-			File heaFile = new File(inputPath + name + ".hea");
-			if (inputFormat != ECGformatConverter.fileFormat.WFDB && heaFile.exists()) {
-				orign = new File(inputPath + heaFile.getName().substring(heaFile.getName().lastIndexOf(sep) + 1));
-				fis = new FileInputStream(orign);
-				
-				filesId = new long[2];
-				filesId[0] = fileId;
-				
-				fileId = ServiceUtils.sendToLiferay(groupId, folderId, userId, inputPath, heaFile.getName().substring(heaFile.getName().lastIndexOf(sep) + 1), orign.length(), fis);
-				filesId[1] = fileId;
-			
-			}else{
-				filesId = new long[1];
-				filesId[0] = fileId;
-			}
-			
-			dbUtility.storeFilesInfo(docId, filesId, null);
-			
-		} 
-		catch (Exception e) {
-			e.printStackTrace();
-			errorMessage =  e.toString();
+	private void cleanupError() throws DataStorageException {
+		
+		boolean status = ServiceUtils.deleteFolderFromLiferay(groupId, folderId, userId);
+		
+		if(status){
+			dbUtility.deleteAllFilesByDocumentRecordId(docId);
 		}
-		return errorMessage;
+		
+	}
+
+
+	private void tranferFileToLiferay(fileFormat outputFormat, fileFormat inputFormat, String inputFilename, String inputPath, long groupId, long folderId, long docId, long userId) throws Exception{
+		
+		String outputExt = ".dat";
+		if (outputFormat == ECGformatConverter.fileFormat.RDT){ 
+			outputExt = ".rdt"; }
+		else if (outputFormat == ECGformatConverter.fileFormat.GEMUSE) {
+			outputExt = ".txt";
+		}else if (outputFormat == ECGformatConverter.fileFormat.HL7) {
+			outputExt = ".xml";
+		}
+
+		String outputFileName = inputFilename.substring(0, inputFilename.lastIndexOf(".")) + outputExt;
+
+		File orign = new File(inputPath + outputFileName);
+		FileInputStream fis = new FileInputStream(orign);
+		
+		Long fileId = ServiceUtils.sendToLiferay(groupId, folderId, userId, inputPath, outputFileName, orign.length(), fis);
+		
+		String name = inputFilename.substring(0, inputFilename.lastIndexOf(".")); // file name minus extension.
+
+		File heaFile = new File(inputPath + name + ".hea");
+		if (inputFormat != ECGformatConverter.fileFormat.WFDB && heaFile.exists()) {
+			orign = new File(inputPath + heaFile.getName().substring(heaFile.getName().lastIndexOf(sep) + 1));
+			fis = new FileInputStream(orign);
+			
+			filesId = new long[2];
+			filesId[0] = fileId;
+			
+			fileId = ServiceUtils.sendToLiferay(groupId, folderId, userId, inputPath, heaFile.getName().substring(heaFile.getName().lastIndexOf(sep) + 1), orign.length(), fis);
+			filesId[1] = fileId;
+		
+		}else{
+			filesId = new long[1];
+			filesId[0] = fileId;
+		}
+		
+		dbUtility.storeFilesInfo(docId, filesId, null);
+			
 	}
 	
 	private boolean commitAnnotations(Set<AnnotationDTO> annotationSet) {
