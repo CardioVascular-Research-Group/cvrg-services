@@ -36,6 +36,13 @@
 	    <groupId>edu.jhu.cvrg</groupId>
 	    <artifactId>cvrg-analysisHub</artifactId>
 	    <version>1.0-SNAPSHOT</version>
+	    <scope>provided</scope>
+	</dependency>
+	<dependency>
+	    <groupId>edu.jhu.cvrg</groupId>
+	    <artifactId>cvrg-dataStorage</artifactId>
+	    <version>1.0-SNAPSHOT</version>
+	    <scope>provided</scope>
 	</dependency>
 	<dependency>
 	    <groupId>edu.jhu.cvrg.liferay</groupId>
@@ -57,6 +64,24 @@
   		<artifactId>cvrg-annotations</artifactId>
   		<version>1.0-SNAPSHOT</version>
   	</dependency>
+  	<dependency>
+	    <groupId>org.sierraecg</groupId>
+	    <artifactId>jsierraecg</artifactId>
+	    <version>1.0-SNAPSHOT</version>
+	    <scope>provided</scope>
+	</dependency>
+  	<dependency>
+	    <groupId>org.cvrgrid.philips</groupId>
+  		<artifactId>Phlilips1.04</artifactId>
+	    <version>1.0-SNAPSHOT</version>
+	    <scope>provided</scope>
+	</dependency>
+	<dependency>
+	    <groupId>org.cvrgrid.schiller</groupId>
+  		<artifactId>schiller-data</artifactId>
+	    <version>1.0-SNAPSHOT</version>
+	    <scope>provided</scope>
+	</dependency>
   </dependencies>
   
   <build>
