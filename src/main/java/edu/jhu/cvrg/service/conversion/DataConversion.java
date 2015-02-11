@@ -624,6 +624,7 @@ public class DataConversion {
 		
 		String inputPath = ServiceUtils.SERVER_TEMP_CONVERSION_FOLDER + sep + metaData.getUserID() + sep;
 		String headerFileName = null;
+		String extraFileName = null;
 		
 		if(inputFormat.equals(ECGformatConverter.fileFormat.WFDB)){
 			metaData.setFileName(metaData.getRecordName()+".dat");
@@ -631,6 +632,9 @@ public class DataConversion {
 			
 			headerFileName = metaData.getRecordName() + ".hea";
 			ServiceUtils.createTempLocalFile(params,"headerFile", inputPath, headerFileName);	
+			
+			extraFileName = metaData.getRecordName() + ".xyz";
+			ServiceUtils.createTempLocalFile(params,"extraFile", inputPath, extraFileName);
 		}else{
 			ServiceUtils.createTempLocalFile(params,"contentFile", inputPath, metaData.getFileName());	
 		}
@@ -654,7 +658,8 @@ public class DataConversion {
 		
 		ServiceUtils.deleteFile(inputPath, metaData.getFileName());
 		if(inputFormat.equals(ECGformatConverter.fileFormat.WFDB)){
-			ServiceUtils.deleteFile(inputPath, headerFileName);	
+			ServiceUtils.deleteFile(inputPath, headerFileName);
+			ServiceUtils.deleteFile(inputPath, extraFileName);
 		}
 		
 		debugPrintln("DataConversion.convertFile() finished.");
