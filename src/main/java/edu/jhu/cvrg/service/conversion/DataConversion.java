@@ -743,7 +743,7 @@ public class DataConversion {
 			
 			docId = dbUtility.storeDocument(Long.valueOf(metaData.getUserID()), metaData.getFileName(), metaData.getSubjectID(), metaData.getFileFormat(), 
 											Double.valueOf(metaData.getSampFrequency()), metaData.getTreePath(), metaData.getChannels(), metaData.getNumberOfPoints(),
-											new GregorianCalendar(), metaData.getSubjectAge(), metaData.getSubjectGender(), null, conv.getAduGain(), filesId);
+											new GregorianCalendar(), metaData.getSubjectAge(), metaData.getSubjectGender(), null, conv.getAduGain(), filesId, conv.getLeadNames());
 			
 			errorMessage = String.valueOf(docId);
 			

@@ -25,6 +25,7 @@ import edu.jhu.cvrg.service.utilities.ServiceUtils;
 import edu.jhu.cvrg.waveform.utility.WebServiceUtility;
 import edu.jhu.icm.ecgFormatConverter.ECGformatConverter;
 import edu.jhu.icm.ecgFormatConverter.ECGformatConverter.fileFormat;
+import edu.jhu.icm.enums.LeadEnum;
 
 public class FileProccessThread extends Thread {
 
@@ -155,7 +156,7 @@ public class FileProccessThread extends Thread {
 					
 					Set<AnnotationDTO> annotationsDTO = new HashSet<AnnotationDTO>();
 					
-					annotationsDTO.addAll(convertLeadAnnotations(leadList, processor));
+					annotationsDTO.addAll(convertLeadAnnotations(leadList, processor, conv.getLeadNames()));
 					annotationsDTO.addAll(convertNonLeadAnnotations(nonLeadList, processor));
 				
 					commitAnnotations(annotationsDTO);
@@ -241,11 +242,29 @@ public class FileProccessThread extends Thread {
 		return success;
 	}	
 
-	private Set<AnnotationDTO> convertLeadAnnotations(Map<Integer, Map<String, String>> leadAnnotations, AnnotationsProcessor processor) {
+	private Set<AnnotationDTO> convertLeadAnnotations(Map<Integer, Map<String, String>> leadAnnotations, AnnotationsProcessor processor, String leadNames) {
 		Set<AnnotationDTO> leadAnnotationSet = new HashSet<AnnotationDTO>();
+		String[] leads = null;
+		if(leadNames != null){
+			leads = leadNames.split(",");
+		}
+		
 		for (Integer key : leadAnnotations.keySet()) {
 			Map<String, String> lead = leadAnnotations.get(key);
-			leadAnnotationSet.addAll(convertAnnotations(lead, key, processor));
+			
+			Integer leadIndex = key;
+			LeadEnum l = LeadEnum.values()[key];
+			
+			if(leads != null){
+				for (int i = 0; i < leads.length; i++) {
+					if(l.name().equals(leads[i])){
+						leadIndex = i;
+						break;
+					}
+				}
+			}
+			
+			leadAnnotationSet.addAll(convertAnnotations(lead, leadIndex, processor));
 		}
 		return leadAnnotationSet;
 	}
