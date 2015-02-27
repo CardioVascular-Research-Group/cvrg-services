@@ -36,7 +36,6 @@
 	    <groupId>edu.jhu.cvrg</groupId>
 	    <artifactId>cvrg-analysisHub</artifactId>
 	    <version>1.0-SNAPSHOT</version>
-	    <scope>provided</scope>
 	</dependency>
 	<dependency>
 	    <groupId>edu.jhu.cvrg</groupId>
