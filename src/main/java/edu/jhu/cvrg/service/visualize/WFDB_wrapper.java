@@ -96,9 +96,11 @@ public class WFDB_wrapper {
 		    }
 		    // read any errors from the attempted command
 		    log.info("Here is the standard error of the command (if any):\n");
-	        while ((error = stdError.readLine()) != null) {
-	        	log.error(error);
-	        }
+		    if(errs.available() > 0){
+		        while ((error = stdError.readLine()) != null) {
+		        	log.error(error);
+		        }
+		    }
 
 		
 		} catch (IOException ioe) {

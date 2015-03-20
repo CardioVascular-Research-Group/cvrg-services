@@ -103,22 +103,13 @@ public class DataConversion {
 	 *  
 	 * @return OMElement containing  "SUCCESS" or "FAILURE"
 	 */
-	private OMElement hL7(OMElement e) {
-		log.info("DataConversion.hL7 service called. Starting HL7 -> RDT.");
-		org.apache.axiom.om.OMElement element = convertFile(e, 
-															ECGformatConverter.fileFormat.HL7,  
-															ECGformatConverter.fileFormat.RDT);
-		if (element.getText().equalsIgnoreCase(SUCCESS)) {
+	public OMElement hL7(OMElement e) {
+		log.info("DataConversion.hL7 service called. Starting HL7 -> WFDB.");
+		
+		return convertFile(e, 
+						  ECGformatConverter.fileFormat.HL7,  
+						  ECGformatConverter.fileFormat.WFDB_16);
 			
-			log.info("HL7 Conversion to RDT succeeded.");
-			element = convertFile(e, 
-								  ECGformatConverter.fileFormat.HL7,  
-								  ECGformatConverter.fileFormat.WFDB_16);
-			if (element.getText().equalsIgnoreCase(SUCCESS)){
-				log.info("HL7 Conversion to WFDB16 succeeded.");
-			}
-		}
-		return element;
 	}
 
 	/** DataConversion service method to convert a xyFile formatted text file (from digitizer) to both WFDB and RDT formatted files.<BR/>
