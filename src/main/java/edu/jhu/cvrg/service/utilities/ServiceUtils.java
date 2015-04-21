@@ -180,23 +180,23 @@ public class ServiceUtils {
 	}
 	
 	public static String extractPath(String sHeaderPathName){
-		log.info("extractPath() from: '" + sHeaderPathName + "'");
-
 		String sFilePath="";
 		int iIndexLastSlash = sHeaderPathName.lastIndexOf("/");
 		
 		sFilePath = sHeaderPathName.substring(0,iIndexLastSlash+1);
 		
+		log.info("extractPath() from: '" + sHeaderPathName + "' : '" + sFilePath + "'");
+		
 		return sFilePath;
 	}
 	
 	public static String extractName(String sFilePathName){
-		log.info("extractName() from: '" + sFilePathName + "'");
-
 		String sFileName="";
 		int iIndexLastSlash = sFilePathName.lastIndexOf("/");
 		
 		sFileName = sFilePathName.substring(iIndexLastSlash+1);
+
+		log.info("extractName() from: '" + sFilePathName + "' : '" + sFileName + "'");
 
 		return sFileName;
 	}
