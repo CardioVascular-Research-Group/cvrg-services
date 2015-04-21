@@ -90,11 +90,11 @@ public class WFDB_wrapper {
 		    	log.info("First 10 rows of data read:");
 		    	String rowValue = "";
 			    for (int row = 0; row < 10; row++) {  // try reading the first 10 rows. 
-			    	rowValue = "";
 			        for (int sig = 0; sig < signalCount; sig++) {
-			        	rowValue =+ data[sig][row] + " ";
+			        	rowValue = rowValue + data[sig][row] + " ";
 			        }
 			        log.info(rowValue);
+			    	rowValue = "";
 				}
 		    }
 		    // read any errors from the attempted command

@@ -94,13 +94,13 @@ public class WFDBExecute {
 			
 			//initialize all to an empty string.
 			for(int lead=0;lead < iDataArrayWidth;lead++){
-				debugPrintln("Initializing CSV for lead: " + lead + " of " + iLeadCount);
+//				debugPrintln("Initializing CSV for lead: " + lead + " of " + iLeadCount);
 				saLeadCSV[lead] = new StringBuilder(); 
 			}
 
 			//build a comma delimited list for each column
 			for(int row=0;row < iDataArrayLength;row++){
-				if(row<10) debugPrintln("Building a CSV list for row: " + row + " of " + visData.getECGDataLength());
+//				if(row<10) debugPrintln("Building a CSV list for row: " + row + " of " + visData.getECGDataLength());
 				for(int lead=0;lead < iDataArrayWidth;lead++){
 					saLeadCSV[lead].append(visData.getECGData()[row][lead]).append(',');
 				}
@@ -108,7 +108,7 @@ public class WFDBExecute {
 
 			// trim trailing comma 
 			for(int lead=0;lead < iDataArrayWidth;lead++){
-				debugPrintln("Finishing CSV for lead: " + lead + " of " + iLeadCount);
+//				debugPrintln("Finishing CSV for lead: " + lead + " of " + iLeadCount);
 				saLeadCSV[lead].deleteCharAt(saLeadCSV[lead].length()-1);
 			}
 		} catch (Exception e) {
