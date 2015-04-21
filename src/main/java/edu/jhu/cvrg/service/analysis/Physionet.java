@@ -122,6 +122,11 @@ public class Physionet {
 		return callWrapper(param0, AnalysisType.CHESNOKOV, AnalysisResultType.ORIGINAL_FILE);	
 	}
 	
+	public org.apache.axiom.om.OMElement chesnokovunixWrapperType2(org.apache.axiom.om.OMElement param0) throws Exception {
+		
+		return callWrapper(param0, AnalysisType.CHESNOKOVUNIX, AnalysisResultType.ORIGINAL_FILE);	
+	}
+	
 	public org.apache.axiom.om.OMElement sqrs2csvWrapperType2(org.apache.axiom.om.OMElement param0) throws Exception {
 		
 		return callWrapper(param0, AnalysisType.SQRS, AnalysisResultType.CSV_FILE);	
