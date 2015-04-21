@@ -225,7 +225,7 @@ public class DataServiceUtils {
 	
 	
 	public void debugPrintln(String text){
-		log.info("++ DataServiceUtils + " + text);
+		log.info(text);
 	}
 
 

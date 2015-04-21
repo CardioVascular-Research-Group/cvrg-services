@@ -88,10 +88,13 @@ public class WFDB_wrapper {
 		    
 		    if(log.isInfoEnabled()){
 		    	log.info("First 10 rows of data read:");
+		    	String rowValue = "";
 			    for (int row = 0; row < 10; row++) {  // try reading the first 10 rows. 
+			    	rowValue = "";
 			        for (int sig = 0; sig < signalCount; sig++) {
-			        	log.info(data[sig][row] + " ");
+			        	rowValue =+ data[sig][row] + " ";
 			        }
+			        log.info(rowValue);
 				}
 		    }
 		    // read any errors from the attempted command

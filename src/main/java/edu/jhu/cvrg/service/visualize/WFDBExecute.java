@@ -398,7 +398,7 @@ public class WFDBExecute {
 	}
 	
 	private void debugPrintln(String text){
-		log.info("-+ wfdbExecute + " + text);
+		log.info(text);
 	}
 
 }
