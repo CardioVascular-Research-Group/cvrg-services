@@ -194,8 +194,8 @@ public class AnalysisUtils {
 	}
 	
 	private static void debugPrintln(String text){
-		System.out.println("++ analysisUtils + " + text);
-		log.info("++ analysisUtils + " + text);
+//		System.out.println("++ analysisUtils + " + text);
+		log.info("~~ analysisUtils ~~ " + text);
 	}
 
 }
