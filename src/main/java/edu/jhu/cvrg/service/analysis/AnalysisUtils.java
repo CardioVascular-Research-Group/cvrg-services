@@ -152,11 +152,15 @@ public class AnalysisUtils {
 				
 				omeReturn.addChild(params.get("fileList"));
 			}else{
+				log.error("Analysis errorMessage: '" + analysis.getErrorMessage() + "'");
+					
 				if(analysis.getFileNames() != null && !analysis.getFileNames().isEmpty()){
 					File tmpJobFolder = new File(ServiceUtils.extractPath(analysis.getFileNames().get(0)));
 					for (File f : tmpJobFolder.listFiles()) {
+						log.error(" * deleting file: " + f.getAbsoluteFile());
 						f.delete();
 					}
+					log.error(" * deleting folder: " + tmpJobFolder.getAbsoluteFile());
 					tmpJobFolder.delete();
 				}
 				
