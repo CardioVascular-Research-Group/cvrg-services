@@ -163,7 +163,7 @@ public class Physionet {
 		AnalysisUtils util = new AnalysisUtils();
 		
 		AnalysisVO analysis = util.parseInputParametersType2(e, method, resultType);
-		log.info("Test Point E2");
+		log.info("Test Point E");
 		try {
 			
 			AnalysisWrapper algorithm = analysis.getType().getWrapper().getConstructor(AnalysisVO.class).newInstance(analysis);
