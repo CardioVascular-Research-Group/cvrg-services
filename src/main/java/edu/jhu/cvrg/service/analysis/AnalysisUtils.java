@@ -166,7 +166,7 @@ public class AnalysisUtils {
 			errorMessage = "genericWrapperType2 failed.";
 			log.error(errorMessage + " " + e.getMessage());
 		}
-		
+		log.info("omeReturn built ");
 		return omeReturn;
 	}
 	
@@ -183,19 +183,12 @@ public class AnalysisUtils {
 		for (String name : analysis.getOutputFileNames()) {
 			fileNames+=(name+'^');
 		}
+		log.info("resultFileNames: " + fileNames);
 		parameterMap.put("resultFileNames", fileNames);
 		
 		ServiceProperties props = ServiceProperties.getInstance();
 		
+		log.info("Calling data tranfer service: " + props.getProperty(ServiceProperties.DATATRANSFER_SERVICE_METHOD));
 		return WebServiceUtility.callWebService(parameterMap, props.getProperty(ServiceProperties.DATATRANSFER_SERVICE_METHOD), props.getProperty(ServiceProperties.DATATRANSFER_SERVICE_NAME), props.getProperty(ServiceProperties.MAIN_SERVICE_URL), null);
-		
-		
-		
 	}
-	
-	private static void debugPrintln(String text){
-//		System.out.println("++ analysisUtils + " + text);
-		log.info("<cvrg-services> " + text);
-	}
-
 }
