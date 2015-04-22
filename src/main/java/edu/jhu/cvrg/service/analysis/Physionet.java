@@ -159,23 +159,25 @@ public class Physionet {
 		
 	private OMElement callWrapper(org.apache.axiom.om.OMElement e, AnalysisType method, AnalysisResultType resultType) {
 		log.info("Physionet." + method.getOmeName() + "() started.");
-		
+		log.info("Test Point E1");
 		AnalysisUtils util = new AnalysisUtils();
 		
 		AnalysisVO analysis = util.parseInputParametersType2(e, method, resultType);
-		
+		log.info("Test Point E2");
 		try {
 			
 			AnalysisWrapper algorithm = analysis.getType().getWrapper().getConstructor(AnalysisVO.class).newInstance(analysis);
-			
+			log.info("Test Point F");			
 			algorithm.defineInputParameters();
+			log.info("Test Point G");
 			algorithm.execute();
+			log.info("Test Point H");
 			
 		} catch (Exception ex) {
 			log.error(ex.getMessage());
 		}
 		
-		
+		log.info("Test Point I");
 		return util.buildOmeReturnType2(analysis);
 	}
 
