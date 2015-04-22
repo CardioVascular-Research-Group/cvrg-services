@@ -126,7 +126,7 @@ public class AnalysisUtils {
 			return null;
 		}
 		
-		log.info("<cvrg-services> buildParamMap() found " + paramMap.size() + " parameters.");
+		log.info("<cvrg-services> found " + paramMap.size() + " parameters.");
 		return paramMap;
 	}
 	

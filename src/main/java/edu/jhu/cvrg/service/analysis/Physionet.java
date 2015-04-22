@@ -158,7 +158,7 @@ public class Physionet {
 	}
 		
 	private OMElement callWrapper(org.apache.axiom.om.OMElement e, AnalysisType method, AnalysisResultType resultType) {
-		debugPrintln("Physionet." + method.getOmeName() + "() started.");
+		log.info("Physionet." + method.getOmeName() + "() started.");
 		
 		AnalysisUtils util = new AnalysisUtils();
 		
@@ -172,7 +172,7 @@ public class Physionet {
 			algorithm.execute();
 			
 		} catch (Exception ex) {
-			System.err.println(ex.getMessage());
+			log.error(ex.getMessage());
 		}
 		
 		
