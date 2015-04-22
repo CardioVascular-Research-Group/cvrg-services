@@ -43,7 +43,7 @@ public class AnalysisUtils {
 	
 	public AnalysisVO parseInputParametersType2(OMElement param0, AnalysisType algorithm, AnalysisResultType resultType){
 		AnalysisVO ret = null;
-		debugPrintln("parseInputParametersType2()");
+		log.info("<cvrg-services> parseInputParametersType2()");
 		try {
 			Map<String, OMElement> params = ServiceUtils.extractParams(param0);
 			
@@ -52,7 +52,7 @@ public class AnalysisUtils {
 			folderID      		= Long.parseLong(params.get("folderID").getText()) ;
 			groupID      		= Long.parseLong(params.get("groupID").getText()) ;
 			OMElement parameterlist = (OMElement) params.get("parameterlist");
-			debugPrintln("****  parameterlist ****: " + parameterlist);
+			log.info("<cvrg-services> ****  parameterlist ****: " + parameterlist);
 			
 			String inputPath = ServiceUtils.SERVER_TEMP_ANALYSIS_FOLDER + sep + jobID;
 			StringTokenizer strToken = new StringTokenizer(params.get("fileNames").getText(), "^");
@@ -66,10 +66,10 @@ public class AnalysisUtils {
 			inputFileNames = fileNames;
 
 			if(parameterlist != null){
-				debugPrintln("Building Command Parameter map...;");
+				log.info("<cvrg-services> Building Command Parameter map...;");
 				mapCommandParam = buildParamMap(parameterlist);
 			}else{
-				debugPrintln("There are no parameters, so Command Parameter map was not built.");
+				log.info("<cvrg-services> There are no parameters, so Command Parameter map was not built.");
 				mapCommandParam = new HashMap<String, Object>(); 
 			}
 			
@@ -79,8 +79,8 @@ public class AnalysisUtils {
 			
 		} catch (Exception e) {
 			errorMessage = "parseInputParametersType2 failed.";
-			debugPrintln("parseInputParametersType2() " + e.getMessage());
-			log.error(errorMessage + " " + e.getMessage());
+//			log.error(parseInputParametersType2() " + e.getMessage());
+			log.error("<cvrg-services> " + errorMessage + " " + e.getMessage());
 		}
 		
 		return ret;
@@ -91,7 +91,7 @@ public class AnalysisUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> buildParamMap(OMElement param0){
-		debugPrintln("buildParamMap()");
+		log.info("<cvrg-services> buildParamMap()");
 	
 		String key="";
 		Object oValue = null;
@@ -105,16 +105,16 @@ public class AnalysisUtils {
 				key = param.getLocalName();
 				oValue = param.getText();
 				if(oValue.toString().length()>0){
-					debugPrintln(" - Key/Value: " + key + " / '" + oValue + "'");
+					log.info("<cvrg-services>  - Key/Value: " + key + " / '" + oValue + "'");
 					paramMap.put(key,oValue);
 				}else{
 					Iterator<OMElement> iterTester = param.getChildren();
 					if(iterTester.hasNext()){
 						OMElement omValue = (OMElement)param;
 						paramMap.put(key,param);
-						debugPrintln(" - Key/OMElement Value: " + key + " / " + omValue.getText()); // param.getText());
+						log.info("<cvrg-services> - Key/OMElement Value: " + key + " / " + omValue.getText()); // param.getText());
 					}else{
-						debugPrintln(" - Key/Blank: " + key + " / '" + oValue + "'");
+						log.info("<cvrg-services> - Key/Blank: " + key + " / '" + oValue + "'");
 						paramMap.put(key,"");	
 					}
 				}
@@ -122,11 +122,11 @@ public class AnalysisUtils {
 			}
 		} catch (Exception e) {
 			errorMessage = "buildParamMap() failed.";
-			log.error(errorMessage + " " + e.getMessage());
+			log.error("<cvrg-services> " + errorMessage + " " + e.getMessage());
 			return null;
 		}
 		
-		debugPrintln("buildParamMap() found " + paramMap.size() + " parameters.");
+		log.info("<cvrg-services> buildParamMap() found " + paramMap.size() + " parameters.");
 		return paramMap;
 	}
 	
@@ -195,7 +195,7 @@ public class AnalysisUtils {
 	
 	private static void debugPrintln(String text){
 //		System.out.println("++ analysisUtils + " + text);
-		log.info("~~ analysisUtils ~~ " + text);
+		log.info("<cvrg-services> " + text);
 	}
 
 }
