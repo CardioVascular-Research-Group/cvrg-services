@@ -159,17 +159,13 @@ public class Physionet {
 		
 	private OMElement callWrapper(org.apache.axiom.om.OMElement e, AnalysisType method, AnalysisResultType resultType) {
 		log.info("Physionet." + method.getOmeName() + "() started.");
-		log.info("Test Point E1");
 		AnalysisUtils util = new AnalysisUtils();
-		log.info("Test Point E2"); 		
 		AnalysisVO analysis = util.parseInputParametersType2(e, method, resultType);
-		log.info("Test Point E3");
 		try {
 			
 			AnalysisWrapper algorithm = analysis.getType().getWrapper().getConstructor(AnalysisVO.class).newInstance(analysis);
-			log.info("Test Point F");			
 			algorithm.defineInputParameters();
-			log.info("Test Point G");
+			log.info("Test Point G algorithm.execute()");
 			algorithm.execute();
 			log.info("Test Point H");
 			
@@ -177,7 +173,6 @@ public class Physionet {
 			log.error(ex.getMessage());
 		}
 		
-		log.info("Test Point I");
 		return util.buildOmeReturnType2(analysis);
 	}
 
