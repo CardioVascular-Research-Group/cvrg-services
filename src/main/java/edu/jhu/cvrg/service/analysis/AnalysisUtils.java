@@ -43,7 +43,7 @@ public class AnalysisUtils {
 	
 	public AnalysisVO parseInputParametersType2(OMElement param0, AnalysisType algorithm, AnalysisResultType resultType){
 		AnalysisVO ret = null;
-		log.info("<cvrg-services> parseInputParametersType2()");
+//		log.info("<cvrg-services> parseInputParametersType2()");
 		try {
 			Map<String, OMElement> params = ServiceUtils.extractParams(param0);
 			
@@ -52,7 +52,7 @@ public class AnalysisUtils {
 			folderID      		= Long.parseLong(params.get("folderID").getText()) ;
 			groupID      		= Long.parseLong(params.get("groupID").getText()) ;
 			OMElement parameterlist = (OMElement) params.get("parameterlist");
-			log.info("<cvrg-services> ****  parameterlist ****: " + parameterlist);
+//			log.info("<cvrg-services> ****  parameterlist ****: " + parameterlist);
 			
 			String inputPath = ServiceUtils.SERVER_TEMP_ANALYSIS_FOLDER + sep + jobID;
 			StringTokenizer strToken = new StringTokenizer(params.get("fileNames").getText(), "^");
@@ -66,7 +66,7 @@ public class AnalysisUtils {
 			inputFileNames = fileNames;
 
 			if(parameterlist != null){
-				log.info("<cvrg-services> Building Command Parameter map...;");
+//				log.info("<cvrg-services> Building Command Parameter map...;");
 				mapCommandParam = buildParamMap(parameterlist);
 			}else{
 				log.info("<cvrg-services> There are no parameters, so Command Parameter map was not built.");
@@ -91,7 +91,7 @@ public class AnalysisUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> buildParamMap(OMElement param0){
-		log.info("<cvrg-services> buildParamMap()");
+//		log.info("<cvrg-services> buildParamMap()");
 	
 		String key="";
 		Object oValue = null;
@@ -105,16 +105,16 @@ public class AnalysisUtils {
 				key = param.getLocalName();
 				oValue = param.getText();
 				if(oValue.toString().length()>0){
-					log.info("<cvrg-services>  - Key/Value: " + key + " / '" + oValue + "'");
+//					log.info("<cvrg-services>  - Key/Value: " + key + " / '" + oValue + "'");
 					paramMap.put(key,oValue);
 				}else{
 					Iterator<OMElement> iterTester = param.getChildren();
 					if(iterTester.hasNext()){
 						OMElement omValue = (OMElement)param;
 						paramMap.put(key,param);
-						log.info("<cvrg-services> - Key/OMElement Value: " + key + " / " + omValue.getText()); // param.getText());
+//						log.info("<cvrg-services> - Key/OMElement Value: " + key + " / " + omValue.getText()); // param.getText());
 					}else{
-						log.info("<cvrg-services> - Key/Blank: " + key + " / '" + oValue + "'");
+//						log.info("<cvrg-services> - Key/Blank: " + key + " / '" + oValue + "'");
 						paramMap.put(key,"");	
 					}
 				}
@@ -126,7 +126,7 @@ public class AnalysisUtils {
 			return null;
 		}
 		
-		log.info("<cvrg-services> found " + paramMap.size() + " parameters.");
+//		log.info("<cvrg-services> found " + paramMap.size() + " parameters.");
 		return paramMap;
 	}
 	
@@ -170,7 +170,7 @@ public class AnalysisUtils {
 			errorMessage = "genericWrapperType2 failed.";
 			log.error(errorMessage + " " + e.getMessage());
 		}
-		log.info("omeReturn built ");
+//		log.info("omeReturn built ");
 		return omeReturn;
 	}
 	
@@ -187,12 +187,12 @@ public class AnalysisUtils {
 		for (String name : analysis.getOutputFileNames()) {
 			fileNames+=(name+'^');
 		}
-		log.info("resultFileNames: " + fileNames);
+//		log.info("resultFileNames: " + fileNames);
 		parameterMap.put("resultFileNames", fileNames);
 		
 		ServiceProperties props = ServiceProperties.getInstance();
 		
-		log.info("Calling data tranfer service: " + props.getProperty(ServiceProperties.DATATRANSFER_SERVICE_METHOD));
+//		log.info("Calling data tranfer service: " + props.getProperty(ServiceProperties.DATATRANSFER_SERVICE_METHOD));
 		return WebServiceUtility.callWebService(parameterMap, props.getProperty(ServiceProperties.DATATRANSFER_SERVICE_METHOD), props.getProperty(ServiceProperties.DATATRANSFER_SERVICE_NAME), props.getProperty(ServiceProperties.MAIN_SERVICE_URL), null);
 	}
 }

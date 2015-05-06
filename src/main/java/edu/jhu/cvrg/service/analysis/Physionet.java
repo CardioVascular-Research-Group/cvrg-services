@@ -158,16 +158,16 @@ public class Physionet {
 	}
 		
 	private OMElement callWrapper(org.apache.axiom.om.OMElement e, AnalysisType method, AnalysisResultType resultType) {
-		log.info("Physionet." + method.getOmeName() + "() started.");
+//		log.info("Physionet." + method.getOmeName() + "() started.");
 		AnalysisUtils util = new AnalysisUtils();
 		AnalysisVO analysis = util.parseInputParametersType2(e, method, resultType);
 		try {
 			
 			AnalysisWrapper algorithm = analysis.getType().getWrapper().getConstructor(AnalysisVO.class).newInstance(analysis);
 			algorithm.defineInputParameters();
-			log.info("Test Point G algorithm.execute()");
+//			log.info("Test Point G algorithm.execute()");
 			algorithm.execute();
-			log.info("Test Point H");
+//			log.info("Test Point H");
 			
 		} catch (Exception ex) {
 			log.error(ex.getMessage());
@@ -178,6 +178,6 @@ public class Physionet {
 
 	
 	private void debugPrintln(String text){
-		log.info("+ physionetAnalysisService + " + text);
+//		log.info("+ physionetAnalysisService + " + text);
 	}
 }
