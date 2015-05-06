@@ -185,7 +185,7 @@ public class ServiceUtils {
 		
 		sFilePath = sHeaderPathName.substring(0,iIndexLastSlash+1);
 		
-		log.info("extractPath() from: '" + sHeaderPathName + "' : '" + sFilePath + "'");
+//		log.info("extractPath() from: '" + sHeaderPathName + "' : '" + sFilePath + "'");
 		
 		return sFilePath;
 	}
@@ -196,7 +196,7 @@ public class ServiceUtils {
 		
 		sFileName = sFilePathName.substring(iIndexLastSlash+1);
 
-		log.info("extractName() from: '" + sFilePathName + "' : '" + sFileName + "'");
+//		log.info("extractName() from: '" + sFilePathName + "' : '" + sFileName + "'");
 
 		return sFileName;
 	}
@@ -207,7 +207,7 @@ public class ServiceUtils {
 	 * @return - a single OMElement containing the path/names.
 	 */
 	public static OMElement makeOutputOMElement(List<String> asFileNames, String sParentOMEName, String sChildOMEName, OMFactory omFactory, OMNamespace omNs){
-		log.info("makeOutputOMElement()" + asFileNames.size() + " file names");
+//		log.info("makeOutputOMElement()" + asFileNames.size() + " file names");
 		OMElement omeArray = null;
 		if (asFileNames != null) {
 			try {
