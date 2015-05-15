@@ -113,7 +113,7 @@ public class ServiceUtils {
 			log.debug(" +++++ Deleted ");
 			ret = true;
 		} catch (Exception e) {
-			log.error("Error on sendToLiferay: "+e.getMessage());
+			log.error("Error on deleteFolderFromLiferay: "+e.getMessage());
 		}
 
 		return ret;
@@ -172,7 +172,7 @@ public class ServiceUtils {
 				fOutStream.close();
 				
 			} catch (IOException e) {
-				log.error("Error on sendToLiferay: "+e.getMessage());
+				log.error("Error on createTempLocalFile: "+e.getMessage());
 			}finally{
 				log.info("File created? " + targetFile.exists());
 			}

@@ -156,12 +156,12 @@ public class AnalysisUtils {
 					
 				if(analysis.getFileNames() != null && !analysis.getFileNames().isEmpty()){
 					File tmpJobFolder = new File(ServiceUtils.extractPath(analysis.getFileNames().get(0)));
-					for (File f : tmpJobFolder.listFiles()) {
-						log.error(" * deleting file: " + f.getAbsoluteFile());
-						f.delete();
-					}
-					log.error(" * deleting folder: " + tmpJobFolder.getAbsoluteFile());
-					tmpJobFolder.delete();
+//					for (File f : tmpJobFolder.listFiles()) {
+//						log.error(" * deleting file: " + f.getAbsoluteFile());
+//						f.delete();
+//					}
+//					log.error(" * deleting folder: " + tmpJobFolder.getAbsoluteFile());
+//					tmpJobFolder.delete();
 				}
 				
 				ServiceUtils.addOMEChild("error","Analysis (File - "+ analysis.getRecordName() +" | Algortithm " + analysis.getType() + " | FORMAT - " + analysis.getResultType() + ") returned the following error: \"" + analysis.getErrorMessage() + "\"",omeReturn,omFactory,omNs);
