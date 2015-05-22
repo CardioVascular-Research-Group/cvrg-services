@@ -41,7 +41,7 @@ public class ServiceUtils {
 	
 	public synchronized static Long sendToLiferay(long groupId, long folderId, long userId, String outputPath, String fileName, long fileSize, InputStream fis){
 		
-		log.debug(" +++++ tranferring " + fileName + " to Liferay");
+		log.info(" +++++ tranferring (copy, delete)" + fileName + " to Liferay");
 		
 		Long ret = null;
 		
@@ -50,7 +50,6 @@ public class ServiceUtils {
 		try {
 			
 			ServiceProperties props = ServiceProperties.getInstance();
-			
 			DLAppServiceSoap service = locator.getPortlet_DL_DLAppService(new URL(props.getProperty(ServiceProperties.LIFERAY_FILES_ENDPOINT_URL)));
 			
 			((Portlet_DL_DLAppServiceSoapBindingStub)service).setUsername(props.getProperty(ServiceProperties.LIFERAY_WS_USER));
@@ -68,15 +67,11 @@ public class ServiceUtils {
 			svc.setGuestOrUserId(userId);
 			svc.setWorkflowAction(LIFERAY_WORKFLOW_STATUS_APPROVED);
 			
-			
 			FileEntrySoap file = service.addFileEntry(groupId, folderId, fileName, "", fileName, "", "1.0", bytes, svc);
-			
-			
 			ret = file.getFileEntryId();
-			
 			deleteFile(outputPath, fileName);
 			
-			log.debug(" +++++ Done tranferring ");
+			log.info(" +++++ Done tranferring ");
 			
 		} catch (Exception e) {
 			log.error("Error on sendToLiferay: "+e.getMessage());
@@ -253,7 +248,7 @@ public class ServiceUtils {
 				}
 				
 			}catch(Exception e){
-				log.error(e.getMessage());
+				log.error("makeOutputOMElement() " + e.getMessage());
 			}
 		}
 		return omeArray;
