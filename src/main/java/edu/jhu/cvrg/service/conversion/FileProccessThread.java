@@ -112,7 +112,7 @@ public class FileProccessThread extends Thread {
 			
 		}finally{
 			writeTime = java.lang.System.currentTimeMillis() - writeTime;
-			log.info("["+docId+"]The runtime for writing the new file is = " + writeTime + " milliseconds");
+			log.info("["+docId+"]The runtime for writing the new file(" + recordName + ") is = " + writeTime + " milliseconds");
 			dbUtility.updateUploadStatus(docId, UploadState.WRITE, writeTime, (!noConversionErrors && done) ? Boolean.TRUE : null, message);
 		}
 		
