@@ -23,8 +23,9 @@ import edu.jhu.cvrg.data.util.DataStorageException;
 import edu.jhu.cvrg.service.conversion.vo.MetaContainer;
 import edu.jhu.cvrg.service.utilities.ServiceUtils;
 import edu.jhu.cvrg.waveform.utility.WebServiceUtility;
-import edu.jhu.icm.ecgFormatConverter.ECGformatConverter;
-import edu.jhu.icm.ecgFormatConverter.ECGformatConverter.fileFormat;
+import edu.jhu.icm.ecgFormatConverter.ECGFileData;
+import edu.jhu.icm.ecgFormatConverter.ECGFormatWriter;
+import edu.jhu.icm.enums.DataFileFormat;
 import edu.jhu.icm.enums.LeadEnum;
 
 public class FileProccessThread extends Thread {
@@ -34,25 +35,25 @@ public class FileProccessThread extends Thread {
 	private static Map<String, Map<String, String>> ontologyCache = new HashMap<String, Map<String,String>>();
 	
 	private MetaContainer metaData;
-	private ECGformatConverter.fileFormat inputFormat;
-	private ECGformatConverter.fileFormat outputFormat; 
+	private DataFileFormat inputFormat;
+	private DataFileFormat outputFormat; 
 	private String inputPath;
 	private long groupId;
 	private long folderId;
 	private String outputPath;
-	private ECGformatConverter conv; 
 	private String recordName;
 	private Connection dbUtility;
 	private long docId;
 	private long userId;
 	private long[] filesId = null;
+	private ECGFileData fileData;
 	
 	long writeTime = 0L;
 	
 	Logger log = Logger.getLogger(FileProccessThread.class);
 	
-	public FileProccessThread(MetaContainer metaData, fileFormat inputFormat,	fileFormat outputFormat, String inputPath, 
-							  long groupId, long folderId, String outputPath, ECGformatConverter conv, String recordName, long docId, long userId) throws DataStorageException {
+	public FileProccessThread(MetaContainer metaData, DataFileFormat inputFormat,	DataFileFormat outputFormat, String inputPath, 
+							  long groupId, long folderId, String outputPath, String recordName, long docId, long userId, ECGFileData fileData) throws DataStorageException {
 		super();
 		this.metaData = metaData;
 		this.inputFormat = inputFormat;
@@ -61,12 +62,12 @@ public class FileProccessThread extends Thread {
 		this.groupId = groupId;
 		this.folderId = folderId;
 		this.outputPath = outputPath;
-		this.conv = conv;
 		this.recordName = recordName;
 		this.setName(metaData.getUserID()+ " - " + recordName);
 		this.dbUtility = ConnectionFactory.createConnection();
 		this.docId = docId;
 		this.userId = userId;
+		this.fileData = fileData;
 	}
 
 
@@ -90,16 +91,19 @@ public class FileProccessThread extends Thread {
 		String message = null;
 		
 		long writeTime = java.lang.System.currentTimeMillis();
-		Boolean done = !(fileFormat.PHILIPS103.equals(inputFormat) || fileFormat.PHILIPS104.equals(inputFormat)  || fileFormat.SCHILLER.equals(inputFormat) || fileFormat.MUSEXML.equals(inputFormat));
+		Boolean done = !(DataFileFormat.PHILIPS103.equals(inputFormat) || DataFileFormat.PHILIPS104.equals(inputFormat)  || DataFileFormat.SCHILLER.equals(inputFormat) || DataFileFormat.MUSEXML.equals(inputFormat));
 		
 		try{
-			int rowsWritten = conv.write(outputFormat, outputPath, recordName);
+			ECGFormatWriter writer = new ECGFormatWriter();
+			writer.writeToFile(outputFormat, outputPath, recordName, fileData);
 			
-			if(rowsWritten == 0){
-				throw new Exception("Unable to write the WFDB file");
-			}
+//			int rowsWritten = conv.write(outputFormat, outputPath, recordName);
 			
-			log.info("rowsWritten: " + rowsWritten);
+//			if(rowsWritten == 0){
+//				throw new Exception("Unable to write the WFDB file");
+//			}
+//			
+//			log.info("rowsWritten: " + rowsWritten);
 			log.info(" +++++ Conversion completed successfully, results will be transfered.");
 			
 			tranferFileToLiferay(outputFormat, inputFormat, metaData.getFileName(), inputPath, groupId, folderId, docId, userId);
@@ -125,23 +129,23 @@ public class FileProccessThread extends Thread {
 				Map<Integer, Map<String, String>> leadList = null;
 				AnnotationsProcessor processor = null;
 				
-				if(fileFormat.PHILIPS103.equals(inputFormat)) {
+				if(DataFileFormat.PHILIPS103.equals(inputFormat)) {
 					
-					org.sierraecg.schema.Restingecgdata ecgData = (org.sierraecg.schema.Restingecgdata) conv.getPhilipsRestingecgdata();
+					org.sierraecg.schema.Restingecgdata ecgData = (org.sierraecg.schema.Restingecgdata) fileData.annotationData;
 					processor = new Philips103AnnotationsProcessor(ecgData);
 				
-				}else if(fileFormat.PHILIPS104.equals(inputFormat)) {
+				}else if(DataFileFormat.PHILIPS104.equals(inputFormat)) {
 					
-					org.cvrgrid.philips.jaxb.beans.Restingecgdata ecgData = (org.cvrgrid.philips.jaxb.beans.Restingecgdata) conv.getPhilipsRestingecgdata();
+					org.cvrgrid.philips.jaxb.beans.Restingecgdata ecgData = (org.cvrgrid.philips.jaxb.beans.Restingecgdata) fileData.annotationData;
 					processor = new Philips104AnnotationsProcessor(ecgData);
 					
-				}else if(fileFormat.SCHILLER.equals(inputFormat)) {
+				}else if(DataFileFormat.SCHILLER.equals(inputFormat)) {
 					                                               
-					org.cvrgrid.schiller.jaxb.beans.ComXiriuzSemaXmlSchillerEDISchillerEDI ecgData = (org.cvrgrid.schiller.jaxb.beans.ComXiriuzSemaXmlSchillerEDISchillerEDI) conv.getComXiriuzSemaXmlSchillerEDISchillerEDI();
+					org.cvrgrid.schiller.jaxb.beans.ComXiriuzSemaXmlSchillerEDISchillerEDI ecgData = (org.cvrgrid.schiller.jaxb.beans.ComXiriuzSemaXmlSchillerEDISchillerEDI) fileData.annotationData;
 					processor = new SchillerAnnotationsProcessor(ecgData);
 					
-				}else if(fileFormat.MUSEXML.equals(inputFormat)) {
-					String rawMuseXML = conv.getMuseRawXML();
+				}else if(DataFileFormat.MUSEXML.equals(inputFormat)) {
+					String rawMuseXML = (String) fileData.annotationData;
 					if(rawMuseXML != null) {
 						processor = new MuseAnnotationsProcessor(rawMuseXML, docId, userId);
 					}
@@ -156,7 +160,7 @@ public class FileProccessThread extends Thread {
 					
 					Set<AnnotationDTO> annotationsDTO = new HashSet<AnnotationDTO>();
 					
-					annotationsDTO.addAll(convertLeadAnnotations(leadList, processor, conv.getLeadNames()));
+					annotationsDTO.addAll(convertLeadAnnotations(leadList, processor, fileData.leadNames));
 					annotationsDTO.addAll(convertNonLeadAnnotations(nonLeadList, processor));
 				
 					commitAnnotations(annotationsDTO);
@@ -187,14 +191,14 @@ public class FileProccessThread extends Thread {
 	}
 
 
-	private void tranferFileToLiferay(fileFormat outputFormat, fileFormat inputFormat, String inputFilename, String inputPath, long groupId, long folderId, long docId, long userId) throws Exception{
+	private void tranferFileToLiferay(DataFileFormat outputFormat, DataFileFormat inputFormat, String inputFilename, String inputPath, long groupId, long folderId, long docId, long userId) throws Exception{
 		
 		String outputExt = ".dat";
-		if (outputFormat == ECGformatConverter.fileFormat.RDT){ 
+		if (outputFormat == DataFileFormat.RDT){ 
 			outputExt = ".rdt"; }
-		else if (outputFormat == ECGformatConverter.fileFormat.GEMUSE) {
+		else if (outputFormat == DataFileFormat.GEMUSE) {
 			outputExt = ".txt";
-		}else if (outputFormat == ECGformatConverter.fileFormat.HL7) {
+		}else if (outputFormat == DataFileFormat.HL7) {
 			outputExt = ".xml";
 		}
 
@@ -208,7 +212,7 @@ public class FileProccessThread extends Thread {
 		String name = inputFilename.substring(0, inputFilename.lastIndexOf(".")); // file name minus extension.
 
 		File heaFile = new File(inputPath + name + ".hea");
-		if (inputFormat != ECGformatConverter.fileFormat.WFDB && heaFile.exists()) {
+		if (inputFormat != DataFileFormat.WFDB && heaFile.exists()) {
 			orign = new File(inputPath + heaFile.getName().substring(heaFile.getName().lastIndexOf(sep) + 1));
 			fis = new FileInputStream(orign);
 			

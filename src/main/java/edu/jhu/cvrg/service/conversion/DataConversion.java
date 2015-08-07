@@ -19,7 +19,9 @@ import edu.jhu.cvrg.data.factory.Connection;
 import edu.jhu.cvrg.data.factory.ConnectionFactory;
 import edu.jhu.cvrg.service.conversion.vo.MetaContainer;
 import edu.jhu.cvrg.service.utilities.ServiceUtils;
-import edu.jhu.icm.ecgFormatConverter.ECGformatConverter;
+import edu.jhu.icm.ecgFormatConverter.ECGFileData;
+import edu.jhu.icm.ecgFormatConverter.ECGFormatReader;
+import edu.jhu.icm.enums.DataFileFormat;
 
 public class DataConversion {
 
@@ -45,8 +47,8 @@ public class DataConversion {
 
 		return convertFile(
 				param0, 
-				ECGformatConverter.fileFormat.RDT,  
-				ECGformatConverter.fileFormat.WFDB_16 );
+				DataFileFormat.RDT,  
+				DataFileFormat.WFDB_16 );
 	}
 
 	/** DataConversion service method to convert a WFDB formatted file to an RDT formatted file.<BR/>
@@ -63,8 +65,8 @@ public class DataConversion {
 
 		return convertFile(
 				param0, 
-				ECGformatConverter.fileFormat.WFDB,  
-				ECGformatConverter.fileFormat.RDT);
+				DataFileFormat.WFDB,  
+				DataFileFormat.RDT);
 
 	}
 
@@ -82,14 +84,14 @@ public class DataConversion {
 
 		org.apache.axiom.om.OMElement element = convertFile(
 				e, 
-				ECGformatConverter.fileFormat.GEMUSE,  
-				ECGformatConverter.fileFormat.RDT);
+				DataFileFormat.GEMUSE,  
+				DataFileFormat.RDT);
 		if (element.getText().equalsIgnoreCase(SUCCESS))
 		{
 			element = convertFile(
 					e, 
-					ECGformatConverter.fileFormat.GEMUSE,  
-					ECGformatConverter.fileFormat.WFDB_16);
+					DataFileFormat.GEMUSE,  
+					DataFileFormat.WFDB_16);
 		}
 		return element;
 	}
@@ -107,36 +109,36 @@ public class DataConversion {
 		log.info("DataConversion.hL7 service called. Starting HL7 -> WFDB.");
 		
 		return convertFile(e, 
-						  ECGformatConverter.fileFormat.HL7,  
-						  ECGformatConverter.fileFormat.WFDB_16);
+						  DataFileFormat.HL7,  
+						  DataFileFormat.WFDB_16);
 			
 	}
 
-	/** DataConversion service method to convert a xyFile formatted text file (from digitizer) to both WFDB and RDT formatted files.<BR/>
-	 * On SUCCESS files of all three formats will be in the input directory<BR/>
-	 * Assumes that the input files are in the input directories, e.g.:<BR/>
-	 * <i>parentFolder/userId/public/subjectId/input</i><br>
-	 * @param e - OMElement containing the parameters:<BR/>
-	 * userId, subjectId, filename, isPublic
-	 *  
-	 * @return OMElement containing  "SUCCESS" or "FAILURE"
-	 */
-	public OMElement xyFile(OMElement e) {
-		log.info("DataConversion.xyFile service called.");
-
-		org.apache.axiom.om.OMElement element = convertFile(e, 
-															ECGformatConverter.fileFormat.RAW_XY_VAR_SAMPLE,  
-															ECGformatConverter.fileFormat.RDT);
-
-		if (element.getText().equalsIgnoreCase(SUCCESS)){
-			element = convertFile(e, 
-								  ECGformatConverter.fileFormat.RAW_XY_VAR_SAMPLE,  
-								  ECGformatConverter.fileFormat.WFDB_16);
-			 
-		} 
-		
-		return element;
-	}
+//	/** DataConversion service method to convert a xyFile formatted text file (from digitizer) to both WFDB and RDT formatted files.<BR/>
+//	 * On SUCCESS files of all three formats will be in the input directory<BR/>
+//	 * Assumes that the input files are in the input directories, e.g.:<BR/>
+//	 * <i>parentFolder/userId/public/subjectId/input</i><br>
+//	 * @param e - OMElement containing the parameters:<BR/>
+//	 * userId, subjectId, filename, isPublic
+//	 *  
+//	 * @return OMElement containing  "SUCCESS" or "FAILURE"
+//	 */
+//	public OMElement xyFile(OMElement e) {
+//		log.info("DataConversion.xyFile service called.");
+//
+//		org.apache.axiom.om.OMElement element = convertFile(e, 
+//															DataFileFormat.RAW_XY_VAR_SAMPLE,  
+//															DataFileFormat.RDT);
+//
+//		if (element.getText().equalsIgnoreCase(SUCCESS)){
+//			element = convertFile(e, 
+//								  DataFileFormat.RAW_XY_VAR_SAMPLE,  
+//								  DataFileFormat.WFDB_16);
+//			 
+//		} 
+//		
+//		return element;
+//	}
 
 	/** DataConversion service method to convert a Philips formatted XML file (Base64) to both WFDB and RDT formatted files.<BR/>
 	 * On SUCCESS files of all three formats will be in the input directory<BR/>
@@ -151,8 +153,8 @@ public class DataConversion {
 		log.info("DataConversion.philips103ToWFDB service called. Starting Philips -> WFDB.");
 
 		return convertFile(e, 
-						   ECGformatConverter.fileFormat.PHILIPS103,  
-						   ECGformatConverter.fileFormat.WFDB_16 );
+						   DataFileFormat.PHILIPS103,  
+						   DataFileFormat.WFDB_16 );
 	}
 	
 	/** DataConversion service method to convert a Philips formatted XML file (Base64) to both WFDB and RDT formatted files.<BR/>
@@ -168,8 +170,8 @@ public class DataConversion {
 		log.info("DataConversion.philips104ToWFDB service called. Starting Philips -> WFDB.");
 
 		return convertFile(e, 
-						   ECGformatConverter.fileFormat.PHILIPS104,  
-						   ECGformatConverter.fileFormat.WFDB_16 );
+						   DataFileFormat.PHILIPS104,  
+						   DataFileFormat.WFDB_16 );
 	}
 	
 	/** DataConversion service method to convert a Philips formatted XML file (Base64) to both WFDB and RDT formatted files.<BR/>
@@ -185,8 +187,8 @@ public class DataConversion {
 		log.info("DataConversion.museXML service called. Starting Philips -> WFDB.");
 
 		return convertFile(e, 
-						   ECGformatConverter.fileFormat.MUSEXML,  
-						   ECGformatConverter.fileFormat.WFDB_16 );
+						   DataFileFormat.MUSEXML,  
+						   DataFileFormat.WFDB_16 );
 	}
 	
 	/** DataConversion service method to convert a SCHILLER formatted XML file (Base64) to both WFDB and RDT formatted files.<BR/>
@@ -204,8 +206,8 @@ public class DataConversion {
 		//log.info(" ");
 
 		return convertFile(e, 
-						   ECGformatConverter.fileFormat.SCHILLER,  
-						   ECGformatConverter.fileFormat.WFDB_16 );
+						   DataFileFormat.SCHILLER,  
+						   DataFileFormat.WFDB_16 );
 	}
 
 	/** DataConversion service method to process the files extracted from a zip file by DataStaging.extractZipFile() and then
@@ -340,9 +342,9 @@ public class DataConversion {
 						else if (method.equals("hL7")) { 
 							successText = hL7(param).getText();
 						}
-						else if (method.equals("xyFile")) { 
-							successText = xyFile(param).getText();
-						}
+//						else if (method.equals("xyFile")) { 
+//							successText = xyFile(param).getText();
+//						}
 
 						debugPrintln("successText: " + successText);
 						if (successText.equals(SUCCESS)) {
@@ -385,7 +387,7 @@ public class DataConversion {
 	private org.apache.axiom.om.OMElement processUnZipDir(org.apache.axiom.om.OMElement param0)
 	{
 		log.info("Service DataConversion.processUnZipDir() started.");
-		ECGformatConverter.fileFormat inputFormat, outputFormat1, outputFormat2;
+		DataFileFormat inputFormat, outputFormat1, outputFormat2;
 
 		Map<String, OMElement> params = ServiceUtils.extractParams(param0);
 		
@@ -461,8 +463,8 @@ public class DataConversion {
 							if (method.equals("rdtToWFDB16")) {
 								log.info("rdtToWFDB16 called.");
 	 
-								inputFormat = ECGformatConverter.fileFormat.RDT;
-								outputFormat1 = ECGformatConverter.fileFormat.WFDB_16;
+								inputFormat = DataFileFormat.RDT;
+								outputFormat1 = DataFileFormat.WFDB_16;
 								
 								wfdbStatus = convertFileCommon(metaData, 
 																inputFormat, 
@@ -472,8 +474,8 @@ public class DataConversion {
 							else if (method.equals("wfdbToRDT")) { 
 								log.info(".hea file found, calling wfdbToRDT()");
 	
-								inputFormat = ECGformatConverter.fileFormat.WFDB;
-								outputFormat1 = ECGformatConverter.fileFormat.RDT;
+								inputFormat = DataFileFormat.WFDB;
+								outputFormat1 = DataFileFormat.RDT;
 								
 								wfdbStatus = convertFileCommon(metaData, 
 										inputFormat, 
@@ -487,9 +489,9 @@ public class DataConversion {
 							else if (method.equals("geMuse")) { 
 								log.info("geMuse called.");
 	
-								inputFormat = ECGformatConverter.fileFormat.GEMUSE;
-								outputFormat1 = ECGformatConverter.fileFormat.RDT;
-								outputFormat2 = ECGformatConverter.fileFormat.WFDB_16;
+								inputFormat = DataFileFormat.GEMUSE;
+								outputFormat1 = DataFileFormat.RDT;
+								outputFormat2 = DataFileFormat.WFDB_16;
 								
 								wfdbStatus = convertFileCommon(metaData, 
 										inputFormat, 
@@ -510,9 +512,9 @@ public class DataConversion {
 							else if (method.equals("hL7")) { 
 								log.info("hL7 called.");
 	
-								inputFormat = ECGformatConverter.fileFormat.HL7;
-								outputFormat1 = ECGformatConverter.fileFormat.RDT;
-								outputFormat2 = ECGformatConverter.fileFormat.WFDB_16;
+								inputFormat = DataFileFormat.HL7;
+								outputFormat1 = DataFileFormat.RDT;
+								outputFormat2 = DataFileFormat.WFDB_16;
 								
 								wfdbStatus = convertFileCommon(metaData, 
 										inputFormat, 
@@ -528,28 +530,28 @@ public class DataConversion {
 											outputFormat2,
 											inputPath, groupId, folderId, companyId, filesId);
 								}
-							}
-							else if (method.equals("xyFile")) { 
-								log.info("xyFile called.");
-	
-								inputFormat = ECGformatConverter.fileFormat.RAW_XY_VAR_SAMPLE;
-								outputFormat1 = ECGformatConverter.fileFormat.RDT;
-								outputFormat2 = ECGformatConverter.fileFormat.WFDB_16;
-								
-								wfdbStatus = convertFileCommon(metaData, 
-										inputFormat, 
-										outputFormat1,
-										inputPath, groupId, folderId, companyId, filesId);
-								
-								if (wfdbStatus.equalsIgnoreCase(SUCCESS))
-								{
-									log.info("RAW_XY_VAR_SAMPLE to RDT suceeded, now calling RAW_XY_VAR_SAMPLE to WFDB_16.");
-									
-									wfdbStatus = convertFileCommon(metaData, 
-											inputFormat, 
-											outputFormat2,
-											inputPath, groupId, folderId, companyId, filesId);
-								}
+//							}
+//							else if (method.equals("xyFile")) { 
+//								log.info("xyFile called.");
+//	
+//								inputFormat = DataFileFormat.RAW_XY_VAR_SAMPLE;
+//								outputFormat1 = DataFileFormat.RDT;
+//								outputFormat2 = DataFileFormat.WFDB_16;
+//								
+//								wfdbStatus = convertFileCommon(metaData, 
+//										inputFormat, 
+//										outputFormat1,
+//										inputPath, groupId, folderId, companyId, filesId);
+//								
+//								if (wfdbStatus.equalsIgnoreCase(SUCCESS))
+//								{
+//									log.info("RAW_XY_VAR_SAMPLE to RDT suceeded, now calling RAW_XY_VAR_SAMPLE to WFDB_16.");
+//									
+//									wfdbStatus = convertFileCommon(metaData, 
+//											inputFormat, 
+//											outputFormat2,
+//											inputPath, groupId, folderId, companyId, filesId);
+//								}
 							}else if (method.equals("na")) { 
 								wfdbStatus = SUCCESS;
 							}
@@ -590,7 +592,7 @@ public class DataConversion {
 	 * @param outputFormat - format to convert to.
 	 * @return OMElement containing  "SUCCESS" or some other string
 	 */
-	private org.apache.axiom.om.OMElement convertFile(	org.apache.axiom.om.OMElement param0,	ECGformatConverter.fileFormat inputFormat, ECGformatConverter.fileFormat outputFormat) {
+	private org.apache.axiom.om.OMElement convertFile(	org.apache.axiom.om.OMElement param0, DataFileFormat inputFormat, DataFileFormat outputFormat) {
 		System.out.println("DataConversion.convertFile()");
 		
 		Map<String, OMElement> params = ServiceUtils.extractParams(param0);
@@ -617,7 +619,7 @@ public class DataConversion {
 		String headerFileName = null;
 		String extraFileName = null;
 		
-		if(inputFormat.equals(ECGformatConverter.fileFormat.WFDB)){
+		if(inputFormat.equals(DataFileFormat.WFDB)){
 			metaData.setFileName(metaData.getRecordName()+".dat");
 			ServiceUtils.createTempLocalFile(params,"contentFile", inputPath, metaData.getFileName());
 			
@@ -648,7 +650,7 @@ public class DataConversion {
 		}
 		
 		ServiceUtils.deleteFile(inputPath, metaData.getFileName());
-		if(inputFormat.equals(ECGformatConverter.fileFormat.WFDB)){
+		if(inputFormat.equals(DataFileFormat.WFDB)){
 			ServiceUtils.deleteFile(inputPath, headerFileName);
 			ServiceUtils.deleteFile(inputPath, extraFileName);
 		}
@@ -680,8 +682,8 @@ public class DataConversion {
 	}
 
 	private String convertFileCommon(MetaContainer metaData,
-									 ECGformatConverter.fileFormat inputFormat,
-									 ECGformatConverter.fileFormat outputFormat, final String inputPath, long groupId, long folderId, long companyId, long[] filesId){
+									 DataFileFormat inputFormat,
+									 DataFileFormat outputFormat, final String inputPath, long groupId, long folderId, long companyId, long[] filesId){
 		
 		String errorMessage = null;
 
@@ -696,10 +698,10 @@ public class DataConversion {
 		debugPrintln("++++           inputPath: " + inputPath);
 		outputPath = inputPath;
 
-		int signalsRequested = 0; // zero means request all signals, only used when reading WFDB format.
+//		int signalsRequested = 0; // zero means request all signals, only used when reading WFDB format.
 		
 		// check that both files are available for WFDB conversion.
-		if(inputFormat == ECGformatConverter.fileFormat.WFDB){
+		if(inputFormat == DataFileFormat.WFDB){
 			errorMessage = checkWFDBcompleteness(inputPath, metaData.getUserID(), metaData.getFileName());
 			if (errorMessage != null && errorMessage.length()>0){
 				debugPrintln("checkWFDBcompleteness() returned: " + errorMessage);
@@ -708,7 +710,6 @@ public class DataConversion {
 			debugPrintln("checkWFDBcompleteness() indicates WFDB is complete.");
 		}
 
-		ECGformatConverter conv = new ECGformatConverter();
 		debugPrintln(metaData.getFileName() + " this is the file sent to the converter ECGformatConverter()");
 		String recordName = metaData.getFileName().substring(0, metaData.getFileName().lastIndexOf(".")); // trim off the extension
 		
@@ -716,29 +717,30 @@ public class DataConversion {
 		
 		try{
 			
-			boolean ret = conv.read(inputFormat, metaData.getFileName(), signalsRequested, inputPath, recordName);
-			debugPrintln("File read returned: " + ret);
+			ECGFormatReader reader = new ECGFormatReader();
+			ECGFileData fileData = reader.read(inputFormat, inputPath+metaData.getFileName());
+//			boolean ret = conv.read(inputFormat, metaData.getFileName(), signalsRequested, inputPath, recordName);
+//			debugPrintln("File read returned: " + ret);
+//			
+//			if(!ret){
+//				errorMessage = "Error: On File read.";
+//				return  errorMessage;
+//			}
 			
-			if(!ret){
-				errorMessage = "Error: On File read.";
-				return  errorMessage;
-			}
-			
-			metaData.setSampFrequency(conv.getSamplingRate());
-			//system.out.println(conv.getSamplingRate() + " this is the sampling rate returned.");
-			metaData.setChannels(conv.getChannelCount());
-			metaData.setNumberOfPoints(conv.getNumberOfPoints());
+			metaData.setSampFrequency(fileData.samplingRate);
+			metaData.setChannels(fileData.channels);
+			metaData.setNumberOfPoints(fileData.samplesPerChannel * fileData.channels);
 
 			
 			Connection dbUtility = ConnectionFactory.createConnection();
 			
 			docId = dbUtility.storeDocument(Long.valueOf(metaData.getUserID()), metaData.getFileName(), metaData.getSubjectID(), metaData.getFileFormat(), 
 											Double.valueOf(metaData.getSampFrequency()), metaData.getTreePath(), metaData.getChannels(), metaData.getNumberOfPoints(),
-											new GregorianCalendar(), metaData.getSubjectAge(), metaData.getSubjectGender(), null, conv.getAduGain(), filesId, conv.getLeadNames());
+											new GregorianCalendar(), metaData.getSubjectAge(), metaData.getSubjectGender(), null, fileData.scalingFactor, filesId, fileData.leadNames);
 			
 			errorMessage = String.valueOf(docId);
 			
-			FileProccessThread newThread = new FileProccessThread(metaData, inputFormat, outputFormat, inputPath, groupId, folderId, outputPath, conv, recordName, docId, Long.valueOf(metaData.getUserID()));
+			FileProccessThread newThread = new FileProccessThread(metaData, inputFormat, outputFormat, inputPath, groupId, folderId, outputPath, recordName, docId, Long.valueOf(metaData.getUserID()), fileData);
 			
 			newThread.start();
 			
