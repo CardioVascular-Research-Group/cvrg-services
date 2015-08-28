@@ -40,7 +40,7 @@
 	<dependency>
 	    <groupId>edu.jhu.cvrg</groupId>
 	    <artifactId>cvrg-dataStorage</artifactId>
-	    <version>1.0-SNAPSHOT</version>
+	    <version>1.2-SNAPSHOT</version>
 	    <scope>provided</scope>
 	</dependency>
 	<dependency>
@@ -52,34 +52,6 @@
 	    <groupId>edu.jhu.cvrg.waveform</groupId>
   		<artifactId>waveform-utilities</artifactId>
 	    <version>1.0-SNAPSHOT</version>
-	</dependency>
-	<dependency>
-		<groupId>edu.jhu.icm</groupId>
-		<artifactId>cvrg-ecg-converter</artifactId>
-		<version>1.5.2-SNAPSHOT</version>
-  	</dependency>
-	<dependency>
-		<groupId>edu.jhu.cvrg</groupId>
-  		<artifactId>cvrg-annotations</artifactId>
-  		<version>1.0-SNAPSHOT</version>
-  	</dependency>
-  	<dependency>
-	    <groupId>org.sierraecg</groupId>
-	    <artifactId>jsierraecg</artifactId>
-	    <version>1.0-SNAPSHOT</version>
-	    <scope>provided</scope>
-	</dependency>
-  	<dependency>
-	    <groupId>org.cvrgrid.philips</groupId>
-  		<artifactId>Phlilips1.04</artifactId>
-	    <version>1.0-SNAPSHOT</version>
-	    <scope>provided</scope>
-	</dependency>
-	<dependency>
-	    <groupId>org.cvrgrid.schiller</groupId>
-  		<artifactId>schiller-data</artifactId>
-	    <version>1.0-SNAPSHOT</version>
-	    <scope>provided</scope>
 	</dependency>
   </dependencies>
   

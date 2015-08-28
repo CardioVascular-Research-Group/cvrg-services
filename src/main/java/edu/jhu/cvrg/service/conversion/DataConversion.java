@@ -3,9 +3,6 @@ package edu.jhu.cvrg.service.conversion;
 
 
 import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -15,20 +12,19 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.log4j.Logger;
 
-import edu.jhu.cvrg.data.factory.Connection;
-import edu.jhu.cvrg.data.factory.ConnectionFactory;
-import edu.jhu.cvrg.service.conversion.vo.MetaContainer;
+import edu.jhu.cvrg.data.enums.FileExtension;
+import edu.jhu.cvrg.data.enums.FileType;
+import edu.jhu.cvrg.filestore.enums.EnumFileExtension;
+import edu.jhu.cvrg.filestore.model.FSFile;
 import edu.jhu.cvrg.service.utilities.ServiceUtils;
-import edu.jhu.icm.ecgFormatConverter.ECGFileData;
-import edu.jhu.icm.ecgFormatConverter.ECGFormatReader;
+import edu.jhu.cvrg.waveform.model.ECGFileMeta;
+import edu.jhu.cvrg.waveform.utility.ECGUploadProcessor;
 import edu.jhu.icm.enums.DataFileFormat;
 
 public class DataConversion {
 
 	private static final String SUCCESS = "SUCCESS";
 	private String sep = File.separator;
-	
-	private boolean verbose = false;
 	
 	Logger log = Logger.getLogger(DataConversion.class);
 
@@ -201,7 +197,7 @@ public class DataConversion {
 	 * @return OMElement containing  "SUCCESS" or "FAILURE"
 	 */
 	public OMElement SCHILLERToWFDB(OMElement e) {
-		System.out.println("DataConversion.SCHILLER service called. Starting SCHILLER -> WFDB.");
+		debugPrintln("DataConversion.SCHILLER service called. Starting SCHILLER -> WFDB.");
 		log.info("DataConversion.SCHILLER service called. Starting SCHILLER -> WFDB.");
 		//log.info(" ");
 
@@ -232,8 +228,6 @@ public class DataConversion {
 		String ftpUser = ((OMElement)iterator.next()).getText();
 		String ftpPassword = ((OMElement)iterator.next()).getText();
 		boolean isPublic = Boolean.getBoolean(((OMElement)iterator.next()).getText());
-		verbose = Boolean.getBoolean(((OMElement)iterator.next()).getText());
-		verbose = true;
 		
 		OMFactory fac = OMAbstractFactory.getOMFactory();
 		OMNamespace omNs = fac.createOMNamespace("http://www.example.org/nodeDataStagingService/","nodeDataStagingService");
@@ -391,9 +385,7 @@ public class DataConversion {
 
 		Map<String, OMElement> params = ServiceUtils.extractParams(param0);
 		
-		MetaContainer metaData = getMetaData(params);
-		
-		verbose = Boolean.getBoolean(params.get("verbose").getText());
+		ECGFileMeta metaData = getMetaData(params);
 		
 		long groupId = Long.valueOf(params.get("groupId").getText()); 
 		long folderId = Long.valueOf(params.get("folderId").getText());
@@ -408,14 +400,14 @@ public class DataConversion {
 			}
 		}
 		
-		String inputPath = ServiceUtils.SERVER_TEMP_CONVERSION_FOLDER + sep + metaData.getUserID();
+		String inputPath = ServiceUtils.SERVER_TEMP_CONVERSION_FOLDER + sep + metaData.getUserId();
 		
 		OMFactory fac = OMAbstractFactory.getOMFactory();
 		OMNamespace omNs = fac.createOMNamespace("http://www.example.org/nodeDataStagingService/","nodeDataStagingService");
 		OMElement nodeConversionStatus = fac.createOMElement("nodeConversionStatus", omNs);
 		boolean allFilesSuccessful = true;
 
-		String zipDirName = metaData.getFileName().substring(0,metaData.getFileName().lastIndexOf(sep)+1);
+		String zipDirName = metaData.getRecordName();
 		debugPrintln("Opening unzip directory: " + zipDirName);
 
 		File zipDir = new File(zipDirName);
@@ -581,6 +573,18 @@ public class DataConversion {
 		return nodeConversionStatus;
 	}
 	
+	public OMElement extractData(OMElement e) {
+		log.info("DataConversion.hL7 service called. Starting HL7 -> WFDB.");
+		
+		debugPrintln("DataConversion.convertFile()");
+		
+		Map<String, OMElement> params = ServiceUtils.extractParams(e);
+		
+		DataFileFormat inputFormat = DataFileFormat.values()[Integer.parseInt(params.get("inputFormat").getText())];
+		DataFileFormat outputFormat = DataFileFormat.values()[Integer.parseInt(params.get("outputFormat").getText())];
+		
+		return convertFile(e, inputFormat, outputFormat);
+	}
 
 	/** Common method for the format converter methods.
 	 * On SUCCESS files of both formats will be in the input directory<BR/>
@@ -593,14 +597,12 @@ public class DataConversion {
 	 * @return OMElement containing  "SUCCESS" or some other string
 	 */
 	private org.apache.axiom.om.OMElement convertFile(	org.apache.axiom.om.OMElement param0, DataFileFormat inputFormat, DataFileFormat outputFormat) {
-		System.out.println("DataConversion.convertFile()");
+		debugPrintln("DataConversion.convertFile()");
 		
 		Map<String, OMElement> params = ServiceUtils.extractParams(param0);
 		
-		MetaContainer metaData = getMetaData(params);
+		ECGFileMeta metaData = getMetaData(params);
 		
-		verbose = Boolean.getBoolean(params.get("verbose").getText());
-		System.out.println(" DataConversion, verbose:" + verbose);
 		long groupId = Long.valueOf(params.get("groupId").getText()); 
 		long folderId = Long.valueOf(params.get("folderId").getText());
 		long companyId = Long.valueOf(params.get("companyId").getText());
@@ -614,25 +616,15 @@ public class DataConversion {
 			}
 		}
 		
-		
-		String inputPath = ServiceUtils.SERVER_TEMP_CONVERSION_FOLDER + sep + metaData.getUserID() + sep;
-		String headerFileName = null;
-		String extraFileName = null;
+		String inputPath = ServiceUtils.SERVER_TEMP_CONVERSION_FOLDER + sep + metaData.getUserId() + sep;
 		
 		if(inputFormat.equals(DataFileFormat.WFDB)){
-			metaData.setFileName(metaData.getRecordName()+".dat");
-			ServiceUtils.createTempLocalFile(params,"contentFile", inputPath, metaData.getFileName());
-			
-			headerFileName = metaData.getRecordName() + ".hea";
-			ServiceUtils.createTempLocalFile(params,"headerFile", inputPath, headerFileName);	
-			
-			extraFileName = metaData.getRecordName() + ".xyz";
-			ServiceUtils.createTempLocalFile(params,"extraFile", inputPath, extraFileName);
+			metaData.setFile(ServiceUtils.createFSFile(params, "headerFile", metaData.getRecordName(), FileExtension.HEA));
+			metaData.addAuxFile(FileExtension.DAT, ServiceUtils.createFSFile(params, "contentFile", metaData.getRecordName(), FileExtension.DAT));
+			metaData.addAuxFile(FileExtension.XYZ, ServiceUtils.createFSFile(params, "extraFile", metaData.getRecordName(), FileExtension.XYZ));
 		}else{
-			ServiceUtils.createTempLocalFile(params,"contentFile", inputPath, metaData.getFileName());	
+			metaData.setFile(ServiceUtils.createFSFile(params, "contentFile", metaData.getRecordName(), metaData.getFileType().getExtension()[0]));
 		}
-		
-		log.info("passed verbose: " + verbose);
 		
 		String returnString = convertFileCommon(metaData, inputFormat, outputFormat, inputPath, groupId, folderId, companyId, filesId);
 		
@@ -649,108 +641,65 @@ public class DataConversion {
 			ServiceUtils.addOMEChild("errorMessage", returnString, e, fac, omNs);	
 		}
 		
-		ServiceUtils.deleteFile(inputPath, metaData.getFileName());
-		if(inputFormat.equals(DataFileFormat.WFDB)){
-			ServiceUtils.deleteFile(inputPath, headerFileName);
-			ServiceUtils.deleteFile(inputPath, extraFileName);
-		}
-		
 		debugPrintln("DataConversion.convertFile() finished.");
 		return e;
 	}
 
-	private MetaContainer getMetaData(Map<String, OMElement> params) {
+	private ECGFileMeta getMetaData(Map<String, OMElement> params) {
 		
-		String userId = params.get("userid").getText();
-		String subjectId = params.get("subjectid").getText();
-		String inputFilename = params.get("filename").getText();
+		String userId = params.get("userId").getText();
+		String documentId = params.get("documentId").getText();
+		String recordName = params.get("recordName").getText();
+		String inputFormat = params.get("inputFormat").getText();
+		String subjectId = params.get("subjectId").getText();
 		String studyID = params.get("studyID").getText();
 		String datatype = params.get("datatype").getText();
-		String treePath = params.get("treePath").getText();
-		String recordName = params.get("recordName").getText();
-		int fileSize = Integer.valueOf(params.get("fileSize").getText());
-		int fileFormat = Integer.valueOf(params.get("fileFormat").getText());
 		
-		MetaContainer metaData = new MetaContainer(inputFilename, fileSize, fileFormat, subjectId, userId, recordName, datatype, studyID, treePath);
+		ECGFileMeta ecgFileMeta = new ECGFileMeta(subjectId, recordName, datatype, studyID, Long.valueOf(userId));
 		
-		metaData.setFullFilePath(metaData.getTreePath()+sep);
+		ecgFileMeta.setDocumentId(Long.valueOf(documentId));
+		ecgFileMeta.setFileType(FileType.values()[Integer.parseInt(inputFormat)]);
 		
-		SimpleDateFormat newDateFormat = new SimpleDateFormat("MM/dd/yyyy");
-		metaData.setFileDate(newDateFormat.format(new Date()));
-		
-		return metaData; 
+		return ecgFileMeta; 
 	}
-
-	private String convertFileCommon(MetaContainer metaData,
+	
+	private String convertFileCommon(ECGFileMeta metaData,
 									 DataFileFormat inputFormat,
 									 DataFileFormat outputFormat, final String inputPath, long groupId, long folderId, long companyId, long[] filesId){
 		
-		String errorMessage = null;
-
-		
+		String returnMessage = null;
 		
 		debugPrintln("++++ Starting: convertFileCommon()");
-		debugPrintln("++++           userId:" + metaData.getUserID());  
+		debugPrintln("++++           userId:" + metaData.getUserId());  
 		debugPrintln("++++           subjectId:" + metaData.getSubjectID());  
-		debugPrintln("++++           inputFilename:" + metaData.getFileName());
-		
-		String outputPath;
+		debugPrintln("++++           inputFilename:" + metaData.getFile().getName());
 		debugPrintln("++++           inputPath: " + inputPath);
-		outputPath = inputPath;
-
-//		int signalsRequested = 0; // zero means request all signals, only used when reading WFDB format.
 		
 		// check that both files are available for WFDB conversion.
 		if(inputFormat == DataFileFormat.WFDB){
-			errorMessage = checkWFDBcompleteness(inputPath, metaData.getUserID(), metaData.getFileName());
-			if (errorMessage != null && errorMessage.length()>0){
-				debugPrintln("checkWFDBcompleteness() returned: " + errorMessage);
-				return errorMessage;
+			returnMessage = checkWFDBcompleteness(metaData);
+			if (returnMessage != null && returnMessage.length()>0){
+				debugPrintln("checkWFDBcompleteness() returned: " + returnMessage);
+				return returnMessage;
 			}
 			debugPrintln("checkWFDBcompleteness() indicates WFDB is complete.");
 		}
 
-		debugPrintln(metaData.getFileName() + " this is the file sent to the converter ECGformatConverter()");
-		String recordName = metaData.getFileName().substring(0, metaData.getFileName().lastIndexOf(".")); // trim off the extension
-		
-		long docId = 0;
+		debugPrintln(metaData.getFile().getName() + " this is the file sent to the converter ECGformatConverter()");
 		
 		try{
-			
-			ECGFormatReader reader = new ECGFormatReader();
-			ECGFileData fileData = reader.read(inputFormat, inputPath+metaData.getFileName());
-//			boolean ret = conv.read(inputFormat, metaData.getFileName(), signalsRequested, inputPath, recordName);
-//			debugPrintln("File read returned: " + ret);
-//			
-//			if(!ret){
-//				errorMessage = "Error: On File read.";
-//				return  errorMessage;
-//			}
-			
-			metaData.setSampFrequency(fileData.samplingRate);
-			metaData.setChannels(fileData.channels);
-			metaData.setNumberOfPoints(fileData.samplesPerChannel * fileData.channels);
-
-			
-			Connection dbUtility = ConnectionFactory.createConnection();
-			
-			docId = dbUtility.storeDocument(Long.valueOf(metaData.getUserID()), metaData.getFileName(), metaData.getSubjectID(), metaData.getFileFormat(), 
-											Double.valueOf(metaData.getSampFrequency()), metaData.getTreePath(), metaData.getChannels(), metaData.getNumberOfPoints(),
-											new GregorianCalendar(), metaData.getSubjectAge(), metaData.getSubjectGender(), null, fileData.scalingFactor, filesId, fileData.leadNames);
-			
-			errorMessage = String.valueOf(docId);
-			
-			FileProccessThread newThread = new FileProccessThread(metaData, inputFormat, outputFormat, inputPath, groupId, folderId, outputPath, recordName, docId, Long.valueOf(metaData.getUserID()), fileData);
-			
-			newThread.start();
-			
+		
+			ECGUploadProcessor processor = new ECGUploadProcessor();
+			processor.execute(metaData);
+			returnMessage = String.valueOf(metaData.getDocumentId());
+		
 		} catch (Exception ex) {
-			errorMessage = "Error: " + ex.toString();
+			returnMessage = "Error: " + ex.toString();
 			ex.printStackTrace();
-			return errorMessage;
+			return returnMessage;
 		}
 		
-		return errorMessage;
+		return returnMessage;
 	}
 
 	/** Checks whether the WFDB upload has all the needed files in the same directory.
@@ -760,29 +709,18 @@ public class DataConversion {
 	 * @param inputFilename - a single file, either .dat, .hea or .xyz 
 	 * @return - reminder message if one of the .dat, .hea or afiles is missing.
 	 */
-	private String checkWFDBcompleteness(String inputPath, String userId, String inputFilename){
+	//TODO [VILARDO] Improve it, to open the HEA file and check the need of the XYZ file.
+	private String checkWFDBcompleteness(ECGFileMeta ecgFileMeta){
 		String status="";
 		
-		debugPrintln("Checking that both .dat and .hea files are available for WFDB conversion in the path:" + inputPath);
+		debugPrintln("Checking that both .dat and .hea files are available for WFDB conversion.");
 		
-		String ext = inputFilename.substring(inputFilename.lastIndexOf(".")+1).toLowerCase(); // get the extension (in lower case)
-		String name = inputFilename.substring(0, inputFilename.lastIndexOf(".")); // file name minus extension.
-//		debugPrintln(inputPath + name + ".dat");
-//		debugPrintln(inputPath + name + ".hea");
-
-		File datFile = new File(inputPath + name + ".dat");
-		File heaFile = new File(inputPath + name + ".hea");
-		if (ext.equalsIgnoreCase("hea")) {
-			if (!datFile.exists()){
-				status = "Reminder: WFDB format requires that you also upload a .xyz or .dat file before the ECG gadget can analyze it.";
-			}
-			// TODO: need to adjust the name of the .dat file within .hea file!!!
-			debugPrintln("bonjour");
-		}
-		else if ((ext.equalsIgnoreCase("dat")) || (ext.equalsIgnoreCase("xyz"))) {
-
-			if (!heaFile.exists()){
-				status = "Reminder: WFDB format requires that you also upload a .hea file before the ECG gadget can analyze it.";
+		FSFile datFile = ecgFileMeta.getAuxiliarFiles().get(EnumFileExtension.DAT);
+		FSFile heaFile = ecgFileMeta.getFile();
+		
+		if (heaFile != null) {
+			if (datFile == null){
+				status = "Reminder: WFDB format requires that you also upload the .dat file before the ECG gadget can analyze it.";
 			}
 		}
 		
@@ -794,7 +732,6 @@ public class DataConversion {
 	 * @param out - String to be printed
 	 */
 	private void debugPrintln(String out){
-//		System.out.println(" #DC3# " + out);
 		log.info(" #DC3# " + out);
 	}
 	
