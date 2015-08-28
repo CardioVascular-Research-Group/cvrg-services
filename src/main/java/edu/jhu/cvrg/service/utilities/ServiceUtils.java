@@ -1,5 +1,6 @@
 package edu.jhu.cvrg.service.utilities;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,6 +21,8 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.om.OMText;
 import org.apache.log4j.Logger;
 
+import edu.jhu.cvrg.data.enums.FileExtension;
+import edu.jhu.cvrg.filestore.model.FSFile;
 import edu.jhu.cvrg.liferay.portal.kernel.repository.model.FileEntrySoap;
 import edu.jhu.cvrg.liferay.portal.service.ServiceContext;
 import edu.jhu.cvrg.liferay.portlet.documentlibrary.service.http.DLAppServiceSoap;
@@ -175,6 +178,44 @@ public class ServiceUtils {
 			}
 		}
 	}
+	
+	public static FSFile createFSFile(Map<String, OMElement> mapWServiceParam, String tagName, String recordName, FileExtension extension) {
+		
+		FSFile newFile = null;
+		OMElement fileNode = mapWServiceParam.get("file_"+tagName);
+		if(fileNode != null){
+			OMText binaryNode = (OMText) fileNode.getFirstOMChild();
+			DataHandler contentDH = (DataHandler) binaryNode.getDataHandler();
+			
+			try {
+				InputStream fileStreamData = contentDH.getInputStream();
+				
+				ByteArrayOutputStream fOutStream = new ByteArrayOutputStream(1024);
+
+				int read = 0;
+				byte[] bytes = new byte[1024];
+
+				while ((read = fileStreamData.read(bytes)) != -1) {
+					fOutStream.write(bytes, 0, read);
+				}
+
+				fileStreamData.close();
+				fOutStream.flush();
+				
+				newFile = new FSFile(-1, recordName+'.'+extension.toString().toLowerCase(), extension.toString(), -1, fOutStream.toByteArray(), -1);
+				
+				fOutStream.close();
+				
+			} catch (IOException e) {
+				log.error("Error on createTempLocalFile: "+e.getMessage());
+			}finally{
+				log.info("File created? " + (newFile.getFileDataAsBytes().length > 0));
+			}
+		}
+		
+		return newFile;
+	}
+	
 	
 	public static String extractPath(String sHeaderPathName){
 		String sFilePath="";
