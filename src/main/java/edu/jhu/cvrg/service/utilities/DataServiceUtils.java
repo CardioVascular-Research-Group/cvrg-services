@@ -10,15 +10,12 @@ import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.log4j.Logger;
 
-import edu.jhu.cvrg.service.visualize.VisualizationData;
+import edu.jhu.cvrg.waveform.model.VisualizationData;
 
 public class DataServiceUtils {
 
 	String errorMessage="";
 	
-	private String[] inputFileNames = null;
-	private String fileName="";
-	private long fileSize=0;
 	private int offsetMilliSeconds=0, durationMilliSeconds=0, graphWidthPixels=0, signalCount= 0, samplesPerSignal = 0;
 	private double sampleFrequency = 0.0;
 	private boolean skipSamples = false;
@@ -26,15 +23,17 @@ public class DataServiceUtils {
 	public Map<String, Object> mapCommandParam = null;
 	public String sJobID="";
 	public String tempFile ="";
-	public Long userId;
 	public String[] saLeadCSV = null; // array of comma separated ECG values, one string per lead.
 	public VisualizationData visData=null;
 	public boolean bTestPattern = false;
 	
+	private String timeseriesId;
+	private String[] leadNames;
+	private double adugain = 1;
 	
 	private static Logger log = Logger.getLogger(DataServiceUtils.class);
 	
-	public Map<String, OMElement> parseInputParametersType2(OMElement param0){
+	public void parseInputParametersType2(OMElement param0){
 		// parse the input parameter's OMElement XML into a Map.
 	    Map<String, OMElement> mapWServiceParam = null;
 	    
@@ -42,18 +41,13 @@ public class DataServiceUtils {
 			mapWServiceParam = ServiceUtils.extractParams(param0);
 			// Assign specific input parameters to local variables.
 			
-			int iFileCount      = Integer.parseInt( (String) mapWServiceParam.get("fileCount").getText() ); 
-			int iParameterCount = Integer.parseInt( (String) mapWServiceParam.get("parameterCount").getText()); 
-			/********************************************/
-			bTestPattern		= Boolean.parseBoolean((String) mapWServiceParam.get("testPattern").getText());
-			if(mapWServiceParam.get("fileSize") != null && bTestPattern){
-				fileSize			= Long.parseLong((String) mapWServiceParam.get("fileSize").getText());
-			}
+			timeseriesId		= mapWServiceParam.get("timeseriesId").getText();
+			leadNames 			= mapWServiceParam.get("leadNames").getText().split(",");
+			adugain				= Double.valueOf((String) mapWServiceParam.get("adugain").getText());
 			
 			offsetMilliSeconds	= Integer.parseInt((String) mapWServiceParam.get("offsetMilliSeconds").getText());
 			durationMilliSeconds= Integer.parseInt((String) mapWServiceParam.get("durationMilliSeconds").getText());
 			graphWidthPixels	= Integer.parseInt((String) mapWServiceParam.get("graphWidthPixels").getText());
-			userId				= Long.valueOf((String) mapWServiceParam.get("userId").getText());
 			
 			sampleFrequency		= Double.valueOf((String) mapWServiceParam.get("sampleFrequency").getText());
 			signalCount			= Integer.valueOf((String) mapWServiceParam.get("signalCount").getText());
@@ -63,33 +57,10 @@ public class DataServiceUtils {
 				skipSamples	= Boolean.valueOf((String) mapWServiceParam.get("noSkip").getText());
 			}
 			
-			debugPrintln("Extracting fileNameList, should be " + iFileCount + " files ...;");
-
-			if(!bTestPattern & (iFileCount>0)){
-				OMElement filehandlelist = (OMElement) mapWServiceParam.get("fileNameList");
-				debugPrintln("Building Input Filename array...;");
-				inputFileNames = buildParamArray(filehandlelist);
-				debugPrintln("Finished Extracting fileNameList, founnd " + inputFileNames.length + " files ...;");
-				
-			}
-			if(iParameterCount>0){
-				debugPrintln("Extracting parameterlist, should be " + iParameterCount + " parameters ...;");
-				OMElement parameterlist = (OMElement) mapWServiceParam.get("parameterlist");
-				debugPrintln("Building Command Parameter map...;");
-				mapCommandParam = buildParamMap(parameterlist);
-			}else{
-				debugPrintln("There are no parameters, so Command Parameter map was not built.");
-			}
-			
-			
-			
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 			errorMessage = "parseInputParametersType2 failed.";
 		}
-		
-		return mapWServiceParam;
 	}
 	
 
@@ -265,33 +236,30 @@ public class DataServiceUtils {
 	}
 
 
-
-	public String[] getInputFileNames() {
-		return inputFileNames;
-	}
-
-
-
-	public String getFileName() {
-		return fileName;
-	}
-
-
-
-	public long getFileSize() {
-		return fileSize;
-	}
-
-
-
 	public boolean isSkipSamples() {
 		return skipSamples;
 	}
 
-
-
 	public void setSkipSamples(boolean noSkip) {
 		this.skipSamples = noSkip;
+	}
+
+
+
+	public String getTimeseriesId() {
+		return timeseriesId;
+	}
+
+
+
+	public String[] getLeadNames() {
+		return leadNames;
+	}
+
+
+
+	public double getAdugain() {
+		return adugain;
 	}
 
 }

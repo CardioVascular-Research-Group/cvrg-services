@@ -1,7 +1,5 @@
 package edu.jhu.cvrg.service.visualize;
 
-import java.io.File;
-
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
@@ -10,6 +8,8 @@ import org.apache.log4j.Logger;
 
 import edu.jhu.cvrg.service.utilities.DataServiceUtils;
 import edu.jhu.cvrg.service.utilities.ServiceUtils;
+import edu.jhu.cvrg.waveform.model.VisualizationData;
+import edu.jhu.cvrg.waveform.utility.ECGVisualizeProcessor;
 
 public class WFDBExecute {
 	
@@ -36,14 +36,13 @@ public class WFDBExecute {
 	 *  graphWidthPixels - Width of the zoomed graph in pixels(zoom factor*unzoomed width), hence the maximum points needed in the returned VisualizationData.<BR>
 	 * @return - OMElement containing the values in the results
 	 */
-	public org.apache.axiom.om.OMElement collectWFDBdataSegment(String[] sWorkingFiles) {
+	public org.apache.axiom.om.OMElement collectWFDBdataSegment() {
 		
 		debugPrintln("** collectWFDBdataSegment() 1.0 called; "); 
 		
 		long startTime = System.currentTimeMillis(), stopTime = 0, elapsed=0;
 		int iLeadCount=0, iDataArrayLength=0,iDataArrayWidth=0;
 		boolean success = true;
-		boolean bTestPattern=false;
 
 		// create output parent OMElement
 		OMFactory factory = OMAbstractFactory.getOMFactory();
@@ -56,34 +55,18 @@ public class WFDBExecute {
 			debugPrintln("- parsing the web service's parameters without regard to order.");
 			// Assign specific input parameters to local variables.
 			
-			bTestPattern = util.bTestPattern;
-
 			//**************************************************
 			debugPrintln("** offsetMilliSeconds: " + util.getOffsetMilliSeconds() + " durationMilliSeconds: " + util.getDurationMilliSeconds());
-
-			String sIgnoreMess="";
+			
 			debugPrintln("[=====================================================================]");
-			debugPrintln(" bTestPattern: " + bTestPattern);
-			debugPrintln(" fileSize: " + util.getFileSize());
 			debugPrintln(" offsetMilliSeconds: " + util.getOffsetMilliSeconds());
 			debugPrintln(" durationMilliSeconds: " + util.getDurationMilliSeconds());
 			debugPrintln(" graphWidthPixels: " + util.getGraphWidthPixels());
-
-			if(bTestPattern) {
-				sIgnoreMess = "Ignored: ";
-			}
-			
-			debugPrintln(sIgnoreMess + "fileName: " + util.getFileName());
 			debugPrintln("[=====================================================================]");
 
-
 			debugPrintln("Creating Visualization Data bean.");
-			if(bTestPattern){
-				visData = fetchSubjectVisualizationTestPattern(util.getFileSize(), util.getOffsetMilliSeconds(), util.getDurationMilliSeconds(), util.getGraphWidthPixels());
-				success=true;
-			}else{
-				visData = fetchWFDBdataSegment(sWorkingFiles, util.getOffsetMilliSeconds(), util.getDurationMilliSeconds(), util.getGraphWidthPixels(), util.isSkipSamples());
-			}
+			
+			visData = ECGVisualizeProcessor.fetchDataSegment(util.getTimeseriesId(), util.getLeadNames(), util.getOffsetMilliSeconds(), util.getDurationMilliSeconds(), util.getGraphWidthPixels(), util.isSkipSamples(), util.getSamplesPerSignal(), (int) util.getSampleFrequency(), util.getAdugain());
 			
 			iLeadCount = visData.getECGDataLeads();
 			iDataArrayLength = visData.getECGData().length; // rows/leads
@@ -99,7 +82,7 @@ public class WFDBExecute {
 			}
 
 			//build a comma delimited list for each column
-			for(int row=0;row < iDataArrayLength;row++){
+			for(int row=0;row < iDataArrayLength;row++){  
 //				if(row<10) debugPrintln("Building a CSV list for row: " + row + " of " + visData.getECGDataLength());
 				for(int lead=0;lead < iDataArrayWidth;lead++){
 					saLeadCSV[lead].append(visData.getECGData()[row][lead]).append(',');
@@ -115,13 +98,6 @@ public class WFDBExecute {
 			System.err.println("collectVisualizationData failed while loading data from ecg file.");
 			e.printStackTrace();
 			success=false;
-		}finally{
-			// remove tempFiles
-			if(!bTestPattern){
-				for (String fn : sWorkingFiles) {
-					new File(fn).delete();
-				}
-			}
 		}
 
 
@@ -130,13 +106,13 @@ public class WFDBExecute {
 		if(success){
 			debugPrintln("Building OMElement from Web Service return values");
 			util.addOMEChild("Status", 			"success",									collectVisualizationData,factory,dsNs);
-			util.addOMEChild("SampleCount", 		String.valueOf(visData.getECGDataLength()),	collectVisualizationData,factory,dsNs);
-			util.addOMEChild("LeadCount", 		String.valueOf(iLeadCount),	collectVisualizationData,factory,dsNs);
+			util.addOMEChild("SampleCount", 	String.valueOf(visData.getECGDataLength()),	collectVisualizationData,factory,dsNs);
+			util.addOMEChild("LeadCount", 		String.valueOf(iLeadCount),					collectVisualizationData,factory,dsNs);
 			util.addOMEChild("Offset", 			String.valueOf(visData.getOffset()),		collectVisualizationData,factory,dsNs);
 			util.addOMEChild("SkippedSamples", 	String.valueOf(visData.getSkippedSamples()),collectVisualizationData,factory,dsNs);
-			util.addOMEChild("SegmentDuration", 		String.valueOf(visData.msDuration),			collectVisualizationData,factory,dsNs);
+			util.addOMEChild("SegmentDuration", String.valueOf(visData.getMsDuration()),	collectVisualizationData,factory,dsNs);
 			for(int lead=0;lead < iDataArrayWidth;lead++){
-				util.addOMEChild("lead_"+lead, 	saLeadCSV[lead].toString(),							collectVisualizationData,factory,dsNs);
+				util.addOMEChild("lead_"+lead, 	saLeadCSV[lead].toString(),					collectVisualizationData,factory,dsNs);
 			}	
 		}else{
 			util.addOMEChild("Status", 			"fail",										collectVisualizationData,factory,dsNs);			
