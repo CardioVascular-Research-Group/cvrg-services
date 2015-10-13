@@ -32,7 +32,7 @@
   <classpathentry kind="var" path="M2_REPO/org/postgresql/postgresql/9.3-1100-jdbc4/postgresql-9.3-1100-jdbc4.jar"/>
   <classpathentry kind="var" path="M2_REPO/edu/jhu/cvrg/liferay/liferay-ws-client/1.0-SNAPSHOT/liferay-ws-client-1.0-SNAPSHOT.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/apache/axis/axis/1.4/axis-1.4.jar"/>
-  <classpathentry kind="var" path="M2_REPO/edu/jhu/cvrg/waveform/waveform-utilities/1.2-SNAPSHOT/waveform-utilities-1.2-SNAPSHOT.jar"/>
+  <classpathentry kind="var" path="M2_REPO/edu/jhu/cvrg/waveform/waveform-utilities/1.2.0.1-SNAPSHOT/waveform-utilities-1.2.0.1-SNAPSHOT.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/apache/axis2/axis2/1.4.1/axis2-1.4.1.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/primefaces/primefaces/4.0/primefaces-4.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/json/json/20090211/json-20090211.jar"/>
@@ -53,7 +53,8 @@
   <classpathentry kind="var" path="M2_REPO/org/cvrgrid/hl7aecg/hl7aECG/1.1-SNAPSHOT/hl7aECG-1.1-SNAPSHOT.jar"/>
   <classpathentry kind="var" path="M2_REPO/hl7OrgV3/aecg/1.0/aecg-1.0.jar"/>
   <classpathentry kind="var" path="M2_REPO/edu/jhu/cvrg/cvrg-annotations/1.0-SNAPSHOT/cvrg-annotations-1.0-SNAPSHOT.jar"/>
-  <classpathentry kind="var" path="M2_REPO/edu/jhu/cvrg/cvrg-opentsdb-client/0.7.6-SNAPSHOT/cvrg-opentsdb-client-0.7.6-SNAPSHOT.jar"/>
+  <classpathentry kind="var" path="M2_REPO/edu/jhu/cvrg/cvrg-opentsdb-client/0.8.6.1-SNAPSHOT/cvrg-opentsdb-client-0.8.6.1-SNAPSHOT.jar"/>
   <classpathentry kind="var" path="M2_REPO/com/google/code/gson/gson/2.3/gson-2.3.jar"/>
   <classpathentry kind="var" path="M2_REPO/commons-io/commons-io/2.4/commons-io-2.4.jar"/>
+  <classpathentry kind="var" path="M2_REPO/com/jcraft/jsch/0.1.53/jsch-0.1.53.jar"/>
 </classpath>
