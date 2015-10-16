@@ -51,7 +51,7 @@
   	<dependency>
 	    <groupId>edu.jhu.cvrg.waveform</groupId>
   		<artifactId>waveform-utilities</artifactId>
-	    <version>1.2.0.1-SNAPSHOT</version>
+	    <version>1.2.0.2-SNAPSHOT</version>
 	</dependency>
   </dependencies>
   
