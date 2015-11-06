@@ -15,6 +15,7 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.log4j.Logger;
 
 import edu.jhu.cvrg.service.dataTransfer.FileResultDTO;
+import edu.jhu.cvrg.waveform.utility.ServiceUtils;
 
 
 public class TransferSvcUtils {

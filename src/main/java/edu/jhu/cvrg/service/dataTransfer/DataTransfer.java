@@ -6,8 +6,8 @@ import java.util.StringTokenizer;
 
 import org.apache.axiom.om.OMElement;
 
-import edu.jhu.cvrg.service.utilities.ServiceUtils;
 import edu.jhu.cvrg.service.utilities.TransferSvcUtils;
+import edu.jhu.cvrg.waveform.utility.ServiceUtils;
 
 
 public class DataTransfer {

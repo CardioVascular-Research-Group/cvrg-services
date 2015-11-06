@@ -11,6 +11,7 @@ import org.apache.axiom.om.OMNamespace;
 import org.apache.log4j.Logger;
 
 import edu.jhu.cvrg.waveform.model.VisualizationData;
+import edu.jhu.cvrg.waveform.utility.ServiceUtils;
 
 public class DataServiceUtils {
 

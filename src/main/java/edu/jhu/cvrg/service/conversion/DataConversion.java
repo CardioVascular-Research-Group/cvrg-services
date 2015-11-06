@@ -16,9 +16,9 @@ import edu.jhu.cvrg.data.enums.FileExtension;
 import edu.jhu.cvrg.data.enums.FileType;
 import edu.jhu.cvrg.filestore.enums.EnumFileExtension;
 import edu.jhu.cvrg.filestore.model.FSFile;
-import edu.jhu.cvrg.service.utilities.ServiceUtils;
 import edu.jhu.cvrg.waveform.model.ECGFileMeta;
 import edu.jhu.cvrg.waveform.utility.ECGUploadProcessor;
+import edu.jhu.cvrg.waveform.utility.ServiceUtils;
 import edu.jhu.icm.enums.DataFileFormat;
 
 public class DataConversion {
@@ -390,6 +390,7 @@ public class DataConversion {
 		long groupId = Long.valueOf(params.get("groupId").getText()); 
 		long folderId = Long.valueOf(params.get("folderId").getText());
 		long companyId = Long.valueOf(params.get("companyId").getText());
+		String openTsdbHost = params.get("openTsdbHost").getText();
 		
 		long[] filesId = null;
 		if(params.get("filesId").getText() != null){
@@ -461,7 +462,7 @@ public class DataConversion {
 								wfdbStatus = convertFileCommon(metaData, 
 																inputFormat, 
 																outputFormat1,
-																inputPath, groupId, folderId, companyId, filesId);
+																inputPath, groupId, folderId, companyId, filesId, openTsdbHost);
 							}
 							else if (method.equals("wfdbToRDT")) { 
 								log.info(".hea file found, calling wfdbToRDT()");
@@ -472,7 +473,7 @@ public class DataConversion {
 								wfdbStatus = convertFileCommon(metaData, 
 										inputFormat, 
 										outputFormat1,
-										inputPath, groupId, folderId, companyId, filesId);
+										inputPath, groupId, folderId, companyId, filesId, openTsdbHost);
 							}
 							else if (method.equals("wfdbToRDTData")) { 
 								debugPrintln("Processing/routing " + zipDirName  + subDirName + sep + "--" + dataFileName + " from zip file. ");
@@ -488,7 +489,7 @@ public class DataConversion {
 								wfdbStatus = convertFileCommon(metaData, 
 										inputFormat, 
 										outputFormat1,
-										inputPath, groupId, folderId, companyId, filesId);
+										inputPath, groupId, folderId, companyId, filesId, openTsdbHost);
 								
 								if (wfdbStatus.equalsIgnoreCase(SUCCESS))
 								{
@@ -497,7 +498,7 @@ public class DataConversion {
 									wfdbStatus = convertFileCommon(metaData, 
 											inputFormat, 
 											outputFormat2,
-											inputPath, groupId, folderId, companyId, filesId);
+											inputPath, groupId, folderId, companyId, filesId, openTsdbHost);
 								}
 	
 							}
@@ -511,7 +512,7 @@ public class DataConversion {
 								wfdbStatus = convertFileCommon(metaData, 
 										inputFormat, 
 										outputFormat1,
-										inputPath, groupId, folderId, companyId, filesId);
+										inputPath, groupId, folderId, companyId, filesId, openTsdbHost);
 								
 								if (wfdbStatus.equalsIgnoreCase(SUCCESS))
 								{
@@ -520,7 +521,7 @@ public class DataConversion {
 									wfdbStatus = convertFileCommon(metaData, 
 											inputFormat, 
 											outputFormat2,
-											inputPath, groupId, folderId, companyId, filesId);
+											inputPath, groupId, folderId, companyId, filesId, openTsdbHost);
 								}
 //							}
 //							else if (method.equals("xyFile")) { 
@@ -606,6 +607,7 @@ public class DataConversion {
 		long groupId = Long.valueOf(params.get("groupId").getText()); 
 		long folderId = Long.valueOf(params.get("folderId").getText());
 		long companyId = Long.valueOf(params.get("companyId").getText());
+		String openTsdbHost = params.get("openTsdbHost").getText();
 		
 		long[] filesId = null;
 		if(params.get("filesId").getText() != null){
@@ -626,7 +628,7 @@ public class DataConversion {
 			metaData.setFile(ServiceUtils.createFSFile(params, "contentFile", metaData.getRecordName(), metaData.getFileType().getExtension()[0]));
 		}
 		
-		String returnString = convertFileCommon(metaData, inputFormat, outputFormat, inputPath, groupId, folderId, companyId, filesId);
+		String returnString = convertFileCommon(metaData, inputFormat, outputFormat, inputPath, groupId, folderId, companyId, filesId, openTsdbHost);
 		
 		OMFactory fac = OMAbstractFactory.getOMFactory();
 		OMNamespace omNs = fac.createOMNamespace("http://www.example.org/nodeConversionService/", "nodeConversionService");
@@ -665,7 +667,7 @@ public class DataConversion {
 	
 	private String convertFileCommon(ECGFileMeta metaData,
 									 DataFileFormat inputFormat,
-									 DataFileFormat outputFormat, final String inputPath, long groupId, long folderId, long companyId, long[] filesId){
+									 DataFileFormat outputFormat, final String inputPath, long groupId, long folderId, long companyId, long[] filesId, String openTsdbHost){
 		
 		String returnMessage = null;
 		
@@ -690,7 +692,7 @@ public class DataConversion {
 		try{
 		
 			ECGUploadProcessor processor = new ECGUploadProcessor();
-			processor.execute(metaData);
+			processor.execute(metaData, openTsdbHost);
 			returnMessage = String.valueOf(metaData.getDocumentId());
 		
 		} catch (Exception ex) {
