@@ -1,12 +1,14 @@
 package edu.jhu.cvrg.service.analysis;
 
+import java.util.Map;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.log4j.Logger;
 
 import edu.jhu.cvrg.analysis.vo.AnalysisResultType;
 import edu.jhu.cvrg.analysis.vo.AnalysisType;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
-import edu.jhu.cvrg.analysis.wrapper.AnalysisWrapper;
+import edu.jhu.cvrg.waveform.utility.ECGAnalyzeProcessor;
 
 /** A collection of methods for building a generic Web Service to wrap around an arbitrary analysis algorithm..
  * 
@@ -41,20 +43,17 @@ public class QRS_ScoreService {
 		AnalysisUtils util = new AnalysisUtils();
 		
 		AnalysisVO analysis = util.parseInputParametersType2(e, method, AnalysisResultType.ORIGINAL_FILE);          //(e, method);
-		
-		
+		Map<Long, String> fileMap = null;
 		try {
 			
-			AnalysisWrapper algorithm = analysis.getType().getWrapper().getConstructor(AnalysisVO.class).newInstance(analysis);
-			
-			algorithm.defineInputParameters();
-			algorithm.execute();
-			
+			fileMap = ECGAnalyzeProcessor.execute(util.getChannels(), util.getLeadNames(), util.getScalingFactor(), util.getSamplesPerChannel(), util.getSamplingRate(), util.getTimeseriesId(), util.getMap(), null, analysis);
+
 		} catch (Exception ex) {
-			System.err.println(ex.getMessage());
+			log.error(ex.getMessage());
 		}
+
 			
-		return util.buildOmeReturnType2(analysis);
+		return util.buildOmeReturnType2(analysis, fileMap);
 	}
 
 	private void debugPrintln(String text){

@@ -1,12 +1,14 @@
 package edu.jhu.cvrg.service.analysis;
 
+import java.util.Map;
+
 import org.apache.axiom.om.OMElement;
 import org.apache.log4j.Logger;
 
 import edu.jhu.cvrg.analysis.vo.AnalysisResultType;
 import edu.jhu.cvrg.analysis.vo.AnalysisType;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
-import edu.jhu.cvrg.analysis.wrapper.AnalysisWrapper;
+import edu.jhu.cvrg.waveform.utility.ECGAnalyzeProcessor;
 
 
 /** A collection of methods for building a generic Web Service to wrap around an arbitrary analysis algorithm..
@@ -158,22 +160,20 @@ public class Physionet {
 	}
 		
 	private OMElement callWrapper(org.apache.axiom.om.OMElement e, AnalysisType method, AnalysisResultType resultType) {
-//		log.info("Physionet." + method.getOmeName() + "() started.");
+
 		AnalysisUtils util = new AnalysisUtils();
 		AnalysisVO analysis = util.parseInputParametersType2(e, method, resultType);
+		Map<Long, String> fileMap = null;
 		try {
 			
-			AnalysisWrapper algorithm = analysis.getType().getWrapper().getConstructor(AnalysisVO.class).newInstance(analysis);
-			algorithm.defineInputParameters();
-//			log.info("Test Point G algorithm.execute()");
-			algorithm.execute();
-//			log.info("Test Point H");
-			
+			fileMap = ECGAnalyzeProcessor.execute(util.getChannels(), util.getLeadNames(), util.getScalingFactor(), util.getSamplesPerChannel(), util.getSamplingRate(), util.getTimeseriesId(), util.getMap(), null, analysis);
+
 		} catch (Exception ex) {
 			log.error(ex.getMessage());
+			analysis.setErrorMessage(ex.getMessage());
 		}
 		
-		return util.buildOmeReturnType2(analysis);
+		return util.buildOmeReturnType2(analysis, fileMap);
 	}
 
 	

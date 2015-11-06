@@ -1,12 +1,9 @@
 package edu.jhu.cvrg.service.analysis;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
@@ -17,8 +14,8 @@ import org.apache.log4j.Logger;
 import edu.jhu.cvrg.analysis.vo.AnalysisResultType;
 import edu.jhu.cvrg.analysis.vo.AnalysisType;
 import edu.jhu.cvrg.analysis.vo.AnalysisVO;
-import edu.jhu.cvrg.service.utilities.ServiceUtils;
 import edu.jhu.cvrg.waveform.utility.ServiceProperties;
+import edu.jhu.cvrg.waveform.utility.ServiceUtils;
 import edu.jhu.cvrg.waveform.utility.WebServiceUtility;
 
 
@@ -31,15 +28,24 @@ public class AnalysisUtils {
 	/** prefix parameter for OMNamespace.createOMNamespace() - the prefix<BR>e.g. physionetAnalysisService **/
 	private String sOMNameSpacePrefix =  "physionetAnalysisService";  
 	public Map<String, Object> mapCommandParam = null;
-	public List<String> inputFileNames = null;
+//	public List<String> inputFileNames = null;
 	
 	private long folderID;
 	private long groupID;
 	private String userID;
 	
+	private int channels;
+	private String leadNames;
+	private double scalingFactor;
+	private int samplesPerChannel;
+	private float samplingRate;
+	private String timeseriesId;
+	private String subjectId;
+	private String openTsdbHost;
+	
 	private static final Logger log = Logger.getLogger(AnalysisUtils.class);
 	
-	private String sep = File.separator;
+//	private String sep = File.separator;
 	
 	public AnalysisVO parseInputParametersType2(OMElement param0, AnalysisType algorithm, AnalysisResultType resultType){
 		AnalysisVO ret = null;
@@ -51,19 +57,30 @@ public class AnalysisUtils {
 			userID 		     	= params.get("userID").getText() ;
 			folderID      		= Long.parseLong(params.get("folderID").getText()) ;
 			groupID      		= Long.parseLong(params.get("groupID").getText()) ;
+			subjectId 			= params.get("subjectID").getText();
+			
+			channels 			= Integer.parseInt(params.get("channels").getText());
+			leadNames 			= params.get("leadNames").getText();
+			scalingFactor 		= Double.parseDouble(params.get("scalingFactor").getText());
+			samplesPerChannel	= Integer.parseInt(params.get("samplesPerChannel").getText());
+			samplingRate		= Float.parseFloat(params.get("samplingRate").getText());
+			timeseriesId 		= params.get("timeseriesId").getText();
+			openTsdbHost		= params.get("openTsdbHost").getText();
+			
+			
 			OMElement parameterlist = (OMElement) params.get("parameterlist");
 //			log.info("<cvrg-services> ****  parameterlist ****: " + parameterlist);
 			
-			String inputPath = ServiceUtils.SERVER_TEMP_ANALYSIS_FOLDER + sep + jobID;
-			StringTokenizer strToken = new StringTokenizer(params.get("fileNames").getText(), "^");
-			List<String> fileNames = new ArrayList<String>();
-			while (strToken.hasMoreTokens()) {
-				String name = strToken.nextToken();
-				//ServiceUtils.createTempLocalFile(params, name, userID, inputPath, name);
-				fileNames.add(inputPath + sep + name);
-			}
+//			String inputPath = ServiceUtils.SERVER_TEMP_ANALYSIS_FOLDER + sep + jobID;
+//			StringTokenizer strToken = new StringTokenizer(params.get("fileNames").getText(), "^");
+//			List<String> fileNames = new ArrayList<String>();
+//			while (strToken.hasMoreTokens()) {
+//				String name = strToken.nextToken();
+//				//ServiceUtils.createTempLocalFile(params, name, userID, inputPath, name);
+//				fileNames.add(inputPath + sep + name);
+//			}
 			
-			inputFileNames = fileNames;
+//			inputFileNames = fileNames;
 
 			if(parameterlist != null){
 //				log.info("<cvrg-services> Building Command Parameter map...;");
@@ -73,8 +90,8 @@ public class AnalysisUtils {
 				mapCommandParam = new HashMap<String, Object>(); 
 			}
 			
-			ret = new AnalysisVO(jobID, algorithm, resultType, inputFileNames, mapCommandParam);
-			
+			ret = new AnalysisVO(jobID, algorithm, resultType, null, mapCommandParam);
+			ret.setRecordName(subjectId);
 			ret.setTempFolder(ServiceUtils.SERVER_TEMP_ANALYSIS_FOLDER);
 			
 		} catch (Exception e) {
@@ -131,7 +148,7 @@ public class AnalysisUtils {
 	}
 	
 
-	public OMElement buildOmeReturnType2(AnalysisVO analysis){
+	public OMElement buildOmeReturnType2(AnalysisVO analysis, Map<Long, String> fileMap){
 		OMElement omeReturn = null;
 		try{
 			OMFactory omFactory = OMAbstractFactory.getOMFactory(); 	 
@@ -141,16 +158,23 @@ public class AnalysisUtils {
 	
 			// Converts the array of filenames to a single "^" delimited String for output.
 			if (analysis.getErrorMessage() == null || analysis.getErrorMessage().length() == 0){
-				ServiceUtils.addOMEChild("filecount", new Long(analysis.getOutputFileNames().size()).toString(),omeReturn,omFactory,omNs);
-				omeReturn.addChild( ServiceUtils.makeOutputOMElement(analysis.getOutputFileNames(), "filenamelist", "filename", omFactory, omNs) );
+				
 				ServiceUtils.addOMEChild("jobID", analysis.getJobId(), omeReturn, omFactory, omNs);
 				
-				OMElement result = sendResultsBack(analysis);
+				if(analysis.getOutputData() != null){
+					ServiceUtils.addOMEChild("outputData", analysis.getOutputData(),omeReturn,omFactory,omNs);
+					
+				}
 				
+				ServiceUtils.addOMEChild("filecount", new Long(analysis.getOutputFileNames().size()).toString(),omeReturn,omFactory,omNs);
+				omeReturn.addChild( ServiceUtils.makeOutputOMElement(analysis.getOutputFileNames(), "filenamelist", "filename", omFactory, omNs) );
 				
-				Map<String, OMElement> params = ServiceUtils.extractParams(result);
+//				OMElement result = sendResultsBack(analysis);
+//				Map<String, OMElement> params = ServiceUtils.extractParams(result);
+//				omeReturn.addChild(params.get("fileList"));
 				
-				omeReturn.addChild(params.get("fileList"));
+				omeReturn.addChild(ServiceUtils.makeOutputOMElement(fileMap.keySet(), "fileList", "fileId", omFactory, omNs));
+				
 			}else{
 				log.error("Analysis errorMessage: '" + analysis.getErrorMessage() + "'");
 					
@@ -164,7 +188,7 @@ public class AnalysisUtils {
 //					tmpJobFolder.delete();
 				}
 				
-				ServiceUtils.addOMEChild("error","Analysis (File - "+ analysis.getRecordName() +" | Algortithm " + analysis.getType() + " | FORMAT - " + analysis.getResultType() + ") returned the following error: \"" + analysis.getErrorMessage() + "\"",omeReturn,omFactory,omNs);
+				ServiceUtils.addOMEChild("error",analysis.getErrorMessage(),omeReturn,omFactory,omNs);
 			}
 		} catch (Exception e) {
 			errorMessage = "genericWrapperType2 failed.";
@@ -194,5 +218,51 @@ public class AnalysisUtils {
 		
 //		log.info("Calling data tranfer service: " + props.getProperty(ServiceProperties.DATATRANSFER_SERVICE_METHOD));
 		return WebServiceUtility.callWebService(parameterMap, props.getProperty(ServiceProperties.DATATRANSFER_SERVICE_METHOD), props.getProperty(ServiceProperties.DATATRANSFER_SERVICE_NAME), props.getProperty(ServiceProperties.MAIN_SERVICE_URL), null);
+	}
+
+	public int getChannels() {
+		return channels;
+	}
+
+	public String getLeadNames() {
+		return leadNames;
+	}
+
+	public double getScalingFactor() {
+		return scalingFactor;
+	}
+
+	public int getSamplesPerChannel() {
+		return samplesPerChannel;
+	}
+
+	public float getSamplingRate() {
+		return samplingRate;
+	}
+
+	public String getTimeseriesId() {
+		return timeseriesId;
+	}
+
+	public String getSubjectId() {
+		return subjectId;
+	}
+	
+	public Map<String, Object> getMap(){
+		Map<String, Object> map = new HashMap<String, Object>();
+		
+		map.put("userID", userID);
+		map.put("folderID", folderID);
+		map.put("groupID", groupID);
+		map.put("subjectID", subjectId);
+		map.put("channels", channels);
+		map.put("leadNames", leadNames);
+		map.put("scalingFactor", scalingFactor);
+		map.put("samplesPerChannel", samplesPerChannel);
+		map.put("samplingRate", samplingRate);
+		map.put("timeseriesId", timeseriesId);
+		map.put("openTsdbHost", openTsdbHost);
+	
+		return map;
 	}
 }
