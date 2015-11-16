@@ -29,6 +29,7 @@ public class DataServiceUtils {
 	public boolean bTestPattern = false;
 	
 	private String timeseriesId;
+	private String openTsdbHost;
 	private String[] leadNames;
 	private double adugain = 1;
 	
@@ -45,6 +46,7 @@ public class DataServiceUtils {
 			timeseriesId		= mapWServiceParam.get("timeseriesId").getText();
 			leadNames 			= mapWServiceParam.get("leadNames").getText().split(",");
 			adugain				= Double.valueOf((String) mapWServiceParam.get("adugain").getText());
+			openTsdbHost		= mapWServiceParam.get("openTsdbHost").getText();
 			
 			offsetMilliSeconds	= Integer.parseInt((String) mapWServiceParam.get("offsetMilliSeconds").getText());
 			durationMilliSeconds= Integer.parseInt((String) mapWServiceParam.get("durationMilliSeconds").getText());
@@ -63,8 +65,6 @@ public class DataServiceUtils {
 			errorMessage = "parseInputParametersType2 failed.";
 		}
 	}
-	
-
 
 	/** Parses a service's incoming XML and builds a string array of all the parameters for easy access.
 	 * @param param0 - OMElement representing XML with the incoming parameters.
@@ -137,9 +137,6 @@ public class DataServiceUtils {
 		debugPrintln("buildParamMap() found " + paramMap.size() + " parameters.");
 		return paramMap;
 	}
-	
-
-
 
 	/** Wrapper around the 3 common functions for adding a child element to a parent OMElement.
 	 * 
@@ -155,9 +152,6 @@ public class DataServiceUtils {
 		parent.addChild(child);
 	}
 
-
-	
-	
 	/** Find the first filename in the array with the "hea" extension.
 	 * 
 	 * @param asInputFileNames - array of filenames to search
@@ -194,48 +188,33 @@ public class DataServiceUtils {
 		return sHeaderPathName;
 	}
 
-	
-	
 	public void debugPrintln(String text){
 		log.info(text);
 	}
-
-
 
 	public int getOffsetMilliSeconds() {
 		return offsetMilliSeconds;
 	}
 
-
-
 	public int getDurationMilliSeconds() {
 		return durationMilliSeconds;
 	}
-
-
 
 	public int getGraphWidthPixels() {
 		return graphWidthPixels;
 	}
 
-
-
 	public int getSignalCount() {
 		return signalCount;
 	}
-
-
 
 	public int getSamplesPerSignal() {
 		return samplesPerSignal;
 	}
 
-
-
 	public double getSampleFrequency() {
 		return sampleFrequency;
 	}
-
 
 	public boolean isSkipSamples() {
 		return skipSamples;
@@ -245,22 +224,20 @@ public class DataServiceUtils {
 		this.skipSamples = noSkip;
 	}
 
-
-
 	public String getTimeseriesId() {
 		return timeseriesId;
 	}
-
-
 
 	public String[] getLeadNames() {
 		return leadNames;
 	}
 
-
-
 	public double getAdugain() {
 		return adugain;
+	}
+
+	public String getOpenTsdbHost() {
+		return openTsdbHost;
 	}
 
 }

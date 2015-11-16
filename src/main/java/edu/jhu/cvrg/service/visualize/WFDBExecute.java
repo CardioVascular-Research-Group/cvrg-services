@@ -50,6 +50,8 @@ public class WFDBExecute {
 
 		StringBuilder[] saLeadCSV = null; // array of comma separated ECG values, one string per lead.
 		VisualizationData visData=null;
+		
+		String errorMessage = null;
 		try{
 			// Parse parameters
 			debugPrintln("- parsing the web service's parameters without regard to order.");
@@ -66,7 +68,7 @@ public class WFDBExecute {
 
 			debugPrintln("Creating Visualization Data bean.");
 			
-			visData = ECGVisualizeProcessor.fetchDataSegment(util.getTimeseriesId(), util.getLeadNames(), util.getOffsetMilliSeconds(), util.getDurationMilliSeconds(), util.getGraphWidthPixels(), util.isSkipSamples(), util.getSamplesPerSignal(), (int) util.getSampleFrequency(), util.getAdugain());
+			visData = ECGVisualizeProcessor.fetchDataSegment(util.getOpenTsdbHost(), util.getTimeseriesId(), util.getLeadNames(), util.getOffsetMilliSeconds(), util.getDurationMilliSeconds(), util.getGraphWidthPixels(), util.isSkipSamples(), util.getSamplesPerSignal(), (int) util.getSampleFrequency(), util.getAdugain());
 			
 			iLeadCount = visData.getECGDataLeads();
 			iDataArrayLength = visData.getECGData().length; // rows/leads
@@ -97,6 +99,12 @@ public class WFDBExecute {
 		} catch (Exception e) {
 			System.err.println("collectVisualizationData failed while loading data from ecg file.");
 			e.printStackTrace();
+			if(e.equals(e.getCause())){
+				errorMessage = e.getMessage();
+			}else{
+				errorMessage = e.getMessage() + ". Caused by: " + e.getCause().getMessage();	
+			}
+			
 			success=false;
 		}
 
@@ -116,6 +124,7 @@ public class WFDBExecute {
 			}	
 		}else{
 			util.addOMEChild("Status", 			"fail",										collectVisualizationData,factory,dsNs);			
+			util.addOMEChild("errorMessage",	errorMessage,								collectVisualizationData,factory,dsNs);
 		}
 
 		stopTime = System.currentTimeMillis();
