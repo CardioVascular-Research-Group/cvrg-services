@@ -158,7 +158,16 @@ public class Physionet {
 		
 		return callWrapper(param0, AnalysisType.WQRS4IHR, AnalysisResultType.CSV_FILE);	
 	}
-		
+	
+	/**
+	 * 
+	 * Perform the analysis logic, using the shared class ECGAnalyzeProcessor
+	 * 
+	 * @param e
+	 * @param method
+	 * @param resultType
+	 * @return
+	 */
 	private OMElement callWrapper(org.apache.axiom.om.OMElement e, AnalysisType method, AnalysisResultType resultType) {
 
 		AnalysisUtils util = new AnalysisUtils();

@@ -37,6 +37,15 @@ public class QRS_ScoreService {
 		return callWrapper(param0, AnalysisType.QRS_SCORE);	
 	}
 
+	/**
+	 * 
+	 * Perform the analysis logic, using the shared class ECGAnalyzeProcessor
+	 * 
+	 * @param e
+	 * @param method
+	 * @param resultType
+	 * @return
+	 */
 	private OMElement callWrapper(org.apache.axiom.om.OMElement e, AnalysisType method) {
 		debugPrintln(method.getOmeName() + "() started.");
 		
